@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import { Cloud, LogOut, LogIn, UserPlus } from 'lucide-react'
-import { useCloudStore, signInWithPassword, signUpWithPassword, signOut } from '../sync/cloudSync'
+import { useCloudStore, signInWithPassword, signUpWithPassword, signOut, displayId } from '../sync/cloudSync'
 import { isCloudEnabled } from '../lib/supabase'
 
 function authErrorMsg(err: unknown): string {
   const m = err instanceof Error ? err.message : String(err)
-  if (m.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 맞지 않습니다. 처음이면 위의 "처음 가입" 탭을 눌러 가입해 주세요.'
-  if (m.includes('Email not confirmed')) return '가입 확인 메일의 링크를 먼저 눌러 주세요.'
-  if (m.includes('User already registered')) return '이미 가입된 이메일입니다. 위의 "로그인" 탭에서 로그인해 주세요.'
+  if (m.includes('Invalid login credentials')) return '아이디 또는 비밀번호가 맞지 않습니다. 처음이면 위의 "처음 가입" 탭을 눌러 가입해 주세요.'
+  if (m.includes('Email not confirmed')) return '가입 확인이 아직 안 됐습니다. (이메일로 가입했다면 확인 메일의 링크를 눌러 주세요.)'
+  if (m.includes('User already registered')) return '이미 가입된 아이디입니다. 위의 "로그인" 탭에서 로그인해 주세요.'
+  if (m.toLowerCase().includes('invalid format') || m.toLowerCase().includes('email address')) return '사용할 수 없는 아이디입니다. 다른 아이디를 입력해 주세요.'
   if (m.includes('Password should be')) return '비밀번호는 6자 이상이어야 합니다.'
   if (m.toLowerCase().includes('rate limit')) return '메일 발송 한도를 넘었습니다. 1시간 뒤 다시 시도해 주세요.'
   return m
@@ -30,7 +31,8 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password) { setMsg('이메일과 비밀번호를 입력해 주세요.'); return }
+    if (!email.trim() || !password) { setMsg('아이디와 비밀번호를 입력해 주세요.'); return }
+    if (/\s/.test(email.trim())) { setMsg('아이디에는 띄어쓰기를 쓸 수 없습니다.'); return }
     if (mode === 'signup' && password !== password2) { setMsg('비밀번호 확인이 일치하지 않습니다.'); return }
     setBusy(true); setMsg('')
     try {
@@ -50,7 +52,7 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
 
   if (session) {
     const label =
-      status === 'not-member' ? '⛔ 아직 초대되지 않은 계정입니다. 관리자에게 이메일 추가를 요청하세요.'
+      status === 'not-member' ? '⛔ 아직 초대되지 않은 계정입니다. 관리자에게 아이디 추가를 요청하세요.'
       : status === 'syncing' ? '⏳ 동기화 중...'
       : status === 'error' ? `⚠️ 동기화 오류: ${errorMsg}`
       : `✓ 실시간 동기화 ON${lastSyncedAt ? ` · ${lastSyncedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}` : ''}`
@@ -58,7 +60,7 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
       <section className="auth-card">
         <div className="auth-row">
           <Cloud size={18} color="var(--primary)" />
-          <span className="auth-email">{session.user.email}</span>
+          <span className="auth-email">{displayId(session.user.email)}</span>
           <button className="auth-ghost" onClick={() => signOut()}><LogOut size={14} /> 로그아웃</button>
         </div>
         <p className={`auth-status ${status === 'not-member' || status === 'error' ? 'bad' : ''}`}>{label}</p>
@@ -78,7 +80,7 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
         <button type="button" role="tab" aria-selected={mode === 'signup'} className={mode === 'signup' ? 'on' : ''} onClick={() => switchMode('signup')}>처음 가입</button>
       </div>
       <form onSubmit={handleSubmit} className="auth-form auth-form-col">
-        <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+        <input type="text" placeholder="아이디 (또는 이메일)" value={email} onChange={e => setEmail(e.target.value)} autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} />
         <input type="password" placeholder={mode === 'signup' ? '사용할 비밀번호 (6자 이상)' : '비밀번호'} value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} />
         {mode === 'signup' && (
           <input type="password" placeholder="비밀번호 확인" value={password2} onChange={e => setPassword2(e.target.value)} autoComplete="new-password" />

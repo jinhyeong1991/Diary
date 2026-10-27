@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle, UserPlus, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { useCloudStore } from '../sync/cloudSync'
+import { useCloudStore, toAuthEmail, displayId } from '../sync/cloudSync'
 import { localDateStr } from '../utils/dateUtils'
 import AuthPanel from '../components/AuthPanel'
 
@@ -68,8 +68,9 @@ const TeamView: React.FC = () => {
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
-    const email = newEmail.trim().toLowerCase()
-    if (!supabase || !email) return
+    if (!supabase || !newEmail.trim()) return
+    if (/\s/.test(newEmail.trim())) { alert('아이디에는 띄어쓰기를 쓸 수 없습니다.'); return }
+    const email = toAuthEmail(newEmail)
     const { error } = await supabase.from('team_allowlist').insert({ email })
     if (error) { alert('추가 실패: ' + error.message); return }
     setNewEmail('')
@@ -78,7 +79,7 @@ const TeamView: React.FC = () => {
 
   const handleRemove = async (email: string) => {
     if (!supabase || email.toLowerCase() === myEmail) return
-    if (!window.confirm(`${email} 의 접근 권한을 삭제할까요?`)) return
+    if (!window.confirm(`${displayId(email)} 의 접근 권한을 삭제할까요?`)) return
     const { error } = await supabase.from('team_allowlist').delete().eq('email', email)
     if (error) { alert('삭제 실패: ' + error.message); return }
     load()
@@ -140,7 +141,7 @@ const TeamView: React.FC = () => {
             <section key={p.id} className="team-card team-member-card" style={{ '--member-color': p.color } as React.CSSProperties}>
               <div className="team-member-head">
                 <span className="team-dot" />
-                <strong>{p.name || p.email}</strong>
+                <strong>{p.name || displayId(p.email)}</strong>
                 {p.id === session.user.id && <span className="team-me">나</span>}
                 {leave && <span className={`team-leave ${leave === '반차' ? 'half' : ''}`}>{leave}</span>}
                 <span className="team-count">{done}/{items.length}</span>
@@ -166,15 +167,15 @@ const TeamView: React.FC = () => {
       {isAdmin && (
         <section className="team-card">
           <h3>직원 초대 (관리자)</h3>
-          <p className="team-muted">여기에 추가한 이메일만 로그인 후 팀 일정을 볼 수 있습니다.</p>
+          <p className="team-muted">여기에 추가한 아이디(또는 이메일)만 가입·로그인 후 팀 일정을 볼 수 있습니다. 추가한 뒤 직원에게 그 아이디로 가입하라고 알려 주세요.</p>
           <form onSubmit={handleInvite} className="team-invite-form">
-            <input type="email" placeholder="직원 이메일" value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+            <input type="text" placeholder="직원 아이디 (또는 이메일)" value={newEmail} onChange={e => setNewEmail(e.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} />
             <button type="submit"><UserPlus size={16} /> 추가</button>
           </form>
           <ul className="team-allowlist">
             {allowlist.map(a => (
               <li key={a.email}>
-                <span>{a.email}{a.is_admin && ' (관리자)'}</span>
+                <span>{displayId(a.email)}{a.is_admin && ' (관리자)'}</span>
                 {a.email.toLowerCase() !== myEmail && (
                   <button onClick={() => handleRemove(a.email)} aria-label="삭제"><Trash2 size={14} /></button>
                 )}

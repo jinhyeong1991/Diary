@@ -245,18 +245,41 @@ export function initCloudSync() {
   })
 }
 
-// 이메일+비밀번호 방식: 아이폰 홈 화면 앱은 Safari 와 저장소가 분리돼 메일 링크 로그인이 앱에 전달되지 않음
-export async function signInWithPassword(email: string, password: string) {
+// Supabase 는 이메일 형식만 받으므로 아이디는 '아이디@pulse.invalid' 로 바꿔 저장 (.invalid 는 실제로 존재할 수 없는 도메인)
+const ID_DOMAIN = 'pulse.invalid'
+const ASCII_ID = /^[a-z0-9._-]+$/
+
+// 아이디 또는 이메일 → 인증용 이메일. 한글 등은 16진수로 인코딩 ('x-' 접두)
+export function toAuthEmail(input: string): string {
+  const v = input.trim().toLowerCase()
+  if (v.includes('@')) return v
+  if (ASCII_ID.test(v)) return `${v}@${ID_DOMAIN}`
+  const hex = [...new TextEncoder().encode(v)].map(b => b.toString(16).padStart(2, '0')).join('')
+  return `x-${hex}@${ID_DOMAIN}`
+}
+
+// 인증용 이메일 → 화면 표시용 (아이디로 가입했으면 아이디만)
+export function displayId(email: string | null | undefined): string {
+  if (!email) return ''
+  const [local, domain] = email.split('@')
+  if (domain !== ID_DOMAIN) return email
+  if (!local.startsWith('x-')) return local
+  const bytes = local.slice(2).match(/../g)?.map(h => parseInt(h, 16)) ?? []
+  return new TextDecoder().decode(new Uint8Array(bytes))
+}
+
+// 이메일(또는 아이디)+비밀번호 방식: 아이폰 홈 화면 앱은 Safari 와 저장소가 분리돼 메일 링크 로그인이 앱에 전달되지 않음
+export async function signInWithPassword(idOrEmail: string, password: string) {
   if (!supabase) throw new Error('클라우드가 설정되지 않았습니다.')
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error } = await supabase.auth.signInWithPassword({ email: toAuthEmail(idOrEmail), password })
   if (error) throw error
 }
 
 // 반환값: true = 바로 로그인됨, false = 확인 메일의 링크를 눌러야 함
-export async function signUpWithPassword(email: string, password: string): Promise<boolean> {
+export async function signUpWithPassword(idOrEmail: string, password: string): Promise<boolean> {
   if (!supabase) throw new Error('클라우드가 설정되지 않았습니다.')
   const redirectTo = window.location.origin + window.location.pathname
-  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } })
+  const { data, error } = await supabase.auth.signUp({ email: toAuthEmail(idOrEmail), password, options: { emailRedirectTo: redirectTo } })
   if (error) throw error
   return !!data.session
 }
