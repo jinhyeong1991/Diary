@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Calendar, 
@@ -35,6 +35,7 @@ import TeamView from './features/TeamView'
 import DayNav from './components/DayNav'
 import { initCloudSync, useCloudStore } from './sync/cloudSync'
 import { isCloudEnabled } from './lib/supabase'
+import { LoginButton, LoginBanner, LoginSheet } from './components/LoginPrompt'
 import { getHolidayName, isKoreanHoliday } from './utils/koreanHolidays'
 import { localDateStr } from './utils/dateUtils'
 
@@ -61,6 +62,9 @@ const App: React.FC = () => {
   const [time, setTime] = useState(new Date())
   const { theme, toggleTheme, name } = useUserStore()
   const cloudStatus = useCloudStore(s => s.status)
+  const [loginOpen, setLoginOpen] = useState(false)
+  const closeLogin = useCallback(() => setLoginOpen(false), [])
+  const signedOut = isCloudEnabled && cloudStatus === 'signed-out'
 
   // 클라우드(Supabase) 로그인·실시간 동기화 시작 (설정 없으면 아무 것도 안 함)
   useEffect(() => { initCloudSync() }, [])
@@ -125,7 +129,8 @@ const App: React.FC = () => {
                 <span className="clock-display">{formattedTime}</span>
                 <span className="date-display">{formattedDate}</span>
               </div>
-              {isCloudEnabled && (
+              {signedOut && <LoginButton onClick={() => setLoginOpen(true)} />}
+              {isCloudEnabled && !signedOut && (
                 <button
                   className={`cloud-indicator cloud-${cloudStatus}`}
                   onClick={() => setActiveView('team')}
@@ -144,6 +149,7 @@ const App: React.FC = () => {
           </header>
 
           <main className="main-content">
+            {signedOut && <LoginBanner onLogin={() => setLoginOpen(true)} />}
             <AnimatePresence mode="wait">
               {activeView === 'home' && <HomeView key="home" />}
               {activeView === 'vacation' && <VacationView key="vacation" />}
@@ -153,6 +159,8 @@ const App: React.FC = () => {
               {activeView === 'settings' && <SettingsView key="settings" />}
             </AnimatePresence>
           </main>
+
+          <LoginSheet open={loginOpen} onClose={closeLogin} />
 
           {/* Mobile Bottom Tab Bar */}
           <nav className="mobile-nav">
