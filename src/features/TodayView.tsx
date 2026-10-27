@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { RefreshCw, ChevronLeft, ChevronRight, Mail, ExternalLink, Sparkles, Settings2, KeyRound } from 'lucide-react'
 import { useUserStore } from '../store/useStore'
@@ -7,6 +7,8 @@ import { fetchWeather, describeWeather, dustGrade, weatherTip } from '../lib/wea
 import type { WeatherData } from '../lib/weather'
 import { fetchFortune, zodiacAnimal, starSign, ageOf } from '../lib/gemini'
 import { localDateStr } from '../utils/dateUtils'
+import { isGmailEnabled, getStoredToken, wasConnected, connectGmail, disconnectGmail, fetchUnread, threadUrl } from '../lib/gmail'
+import type { MailItem } from '../lib/gmail'
 
 type Page = 'main' | 'fortune' | 'setup'
 
@@ -156,8 +158,85 @@ const MailCard: React.FC = () => (
       </a>
     </div>
     <p className="today-muted">휴대폰에서는 설치된 메일 앱이나 브라우저로 열립니다.</p>
+    {isGmailEnabled && <GmailInbox />}
   </section>
 )
+
+// Gmail 안 읽은 메일 목록 (구글 로그인 후 1시간 동안 유지, 지나면 '다시 연결')
+const GmailInbox: React.FC = () => {
+  const [token, setToken] = useState<string | null>(() => getStoredToken())
+  const [data, setData] = useState<{ total: number; items: MailItem[] } | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const load = useCallback(async (t: string) => {
+    setLoading(true); setError('')
+    try { setData(await fetchUnread(t)) }
+    catch (e) {
+      const m = e instanceof Error ? e.message : String(e)
+      if (m === 'EXPIRED') { setToken(null); setData(null) } else setError(m)
+    } finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { if (token) load(token) }, [token, load])
+
+  const connect = async () => {
+    setError('')
+    try { setToken(await connectGmail()) }
+    catch (e) { setError(e instanceof Error ? e.message : String(e)) }
+  }
+  const disconnect = async () => { await disconnectGmail(); setToken(null); setData(null) }
+
+  const timeLabel = (d: Date) => {
+    const today = new Date()
+    return d.toDateString() === today.toDateString()
+      ? d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })
+      : d.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })
+  }
+
+  return (
+    <div className="gmail-box">
+      {!token ? (
+        <button className="gmail-connect" onClick={connect}>
+          <span className="mail-badge">G</span>
+          {wasConnected() ? 'Gmail 다시 연결하고 안 읽은 메일 보기' : 'Gmail 연결하고 안 읽은 메일 보기'}
+        </button>
+      ) : (
+        <>
+          <div className="gmail-head">
+            <strong>📬 Gmail 안 읽은 메일 {data ? `${data.total}개` : ''}</strong>
+            <button className="today-icon-btn" onClick={() => load(token)} disabled={loading} aria-label="메일 새로고침">
+              <RefreshCw size={16} className={loading ? 'spin' : ''} />
+            </button>
+          </div>
+          {!data && loading && <p className="today-muted">메일을 불러오는 중...</p>}
+          {data && data.items.length === 0 && <p className="today-muted">안 읽은 메일이 없어요. 🎉</p>}
+          {data && data.items.length > 0 && (
+            <ul className="gmail-list">
+              {data.items.map(m => (
+                <li key={m.id}>
+                  <a href={threadUrl(m.threadId)} target="_blank" rel="noopener noreferrer" className="gmail-item">
+                    <div className="gmail-item-top">
+                      <span className="gmail-from">{m.from}</span>
+                      <span className="gmail-time">{timeLabel(m.date)}</span>
+                    </div>
+                    <span className="gmail-subject">{m.subject}</span>
+                    <span className="gmail-snippet">{m.snippet}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          {data && data.total > data.items.length && (
+            <p className="today-muted">최근 {data.items.length}개만 보여요. 나머지는 Gmail에서 확인하세요.</p>
+          )}
+          <button className="gmail-disconnect" onClick={disconnect}>Gmail 연결 끊기</button>
+        </>
+      )}
+      {error && <p className="fortune-error-text">{error}</p>}
+    </div>
+  )
+}
 
 /* ───────── 운세 상세 ───────── */
 const FORTUNE_ITEMS: { key: keyof Pick<FortuneResult, 'total' | 'money' | 'love' | 'work' | 'health' | 'relationship'>; label: string; icon: string }[] = [
@@ -393,7 +472,19 @@ const TodayStyle: React.FC = () => (
     .mail-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mail-badge { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; flex-shrink: 0; }
     .mail-naver .mail-badge { background: #03C75A; }
-    .mail-gmail .mail-badge { background: #EA4335; }
+    .mail-gmail .mail-badge, .gmail-connect .mail-badge { background: #EA4335; }
+    .gmail-box { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .gmail-connect { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-weight: 700; font-size: var(--fs-sm); text-align: left; }
+    .gmail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .gmail-head strong { font-size: var(--fs-base); color: var(--text-main); }
+    .gmail-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .gmail-item { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); text-decoration: none; min-width: 0; }
+    .gmail-item-top { display: flex; justify-content: space-between; gap: 8px; }
+    .gmail-from { font-size: var(--fs-sm); font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .gmail-time { font-size: var(--fs-xs); color: var(--text-sub); flex-shrink: 0; }
+    .gmail-subject { font-size: var(--fs-sm); color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gmail-snippet { font-size: var(--fs-xs); color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gmail-disconnect { align-self: flex-end; font-size: var(--fs-xs); color: var(--text-sub); text-decoration: underline; padding: 6px 2px; }
 
     .score-ring { position: relative; flex-shrink: 0; }
     .score-ring svg { display: block; }
