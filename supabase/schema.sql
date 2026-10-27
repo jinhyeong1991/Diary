@@ -63,6 +63,10 @@ drop trigger if exists profiles_touch on public.profiles;
 create trigger profiles_touch before insert or update on public.profiles
   for each row execute function public.touch_updated_at();
 
+-- 프로젝트 생성 시 'Automatically expose new tables'를 껐어도 앱이 접근할 수 있도록 명시 (실제 허용 범위는 아래 RLS가 결정)
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on public.team_allowlist, public.profiles, public.user_data to authenticated;
+
 -- 4) 접근 권한 (RLS)
 alter table public.team_allowlist enable row level security;
 alter table public.profiles enable row level security;
