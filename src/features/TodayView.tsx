@@ -380,16 +380,14 @@ const FortuneSetup: React.FC<{ onDone: () => void; onBack: () => void }> = ({ on
             <button type="button" className={form.gender === 'male' ? 'on' : ''} onClick={() => set('gender', 'male')}>남성</button>
             <button type="button" className={form.gender === 'female' ? 'on' : ''} onClick={() => set('gender', 'female')}>여성</button>
           </div>
-          <label>생년월일
-            <input type="date" value={form.birthDate} onChange={e => set('birthDate', e.target.value)} max={localDateStr()} />
-          </label>
+          <div className="setup-label">생년월일</div>
+          <BirthDatePicker value={form.birthDate} onChange={v => set('birthDate', v)} />
           <div className="seg">
             <button type="button" className={form.calendar === 'solar' ? 'on' : ''} onClick={() => set('calendar', 'solar')}>양력</button>
             <button type="button" className={form.calendar === 'lunar' ? 'on' : ''} onClick={() => set('calendar', 'lunar')}>음력</button>
           </div>
-          <label>태어난 시간 <small>(모르면 비워 두세요)</small>
-            <input type="time" value={form.birthTime} onChange={e => set('birthTime', e.target.value)} />
-          </label>
+          <div className="setup-label">태어난 시간 <small>(모르면 '모름')</small></div>
+          <BirthTimePicker value={form.birthTime} onChange={v => set('birthTime', v)} />
 
           <div className="setup-key">
             <div className="setup-label"><KeyRound size={14} /> Google AI Studio API 키</div>
@@ -405,6 +403,56 @@ const FortuneSetup: React.FC<{ onDone: () => void; onBack: () => void }> = ({ on
         </form>
       </section>
     </>
+  )
+}
+
+/* ───────── 생년월일·시간 선택 (휴대폰 기본 달력은 연도 고르기가 불편하고 일부 기기에서 안 열려서 드롭다운 사용) ───────── */
+const pad = (n: number) => String(n).padStart(2, '0')
+
+const BirthDatePicker: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => {
+  const [y, m, d] = value ? value.split('-').map(Number) : [0, 0, 0]
+  const thisYear = new Date().getFullYear()
+  const years = Array.from({ length: thisYear - 1929 }, (_, i) => thisYear - i)
+  const [partial, setPartial] = useState<[number, number, number]>([y, m, d])
+  const [py, pm, pd] = value ? [y, m, d] : partial
+  const daysIn = py && pm ? new Date(py, pm, 0).getDate() : 31
+  // 세 칸이 다 골라져야 값이 생김. 일이 그 달 범위를 넘으면 말일로 맞춤
+  const update = (ny: number, nm: number, nd: number) => {
+    setPartial([ny, nm, nd])
+    if (ny && nm && nd) onChange(`${ny}-${pad(nm)}-${pad(Math.min(nd, new Date(ny, nm, 0).getDate()))}`)
+    else onChange('')
+  }
+  return (
+    <div className="picker-row">
+      <select value={py || ''} onChange={e => update(Number(e.target.value), pm, pd)} aria-label="태어난 해">
+        <option value="">년</option>
+        {years.map(v => <option key={v} value={v}>{v}년</option>)}
+      </select>
+      <select value={pm || ''} onChange={e => update(py, Number(e.target.value), pd)} aria-label="태어난 달">
+        <option value="">월</option>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map(v => <option key={v} value={v}>{v}월</option>)}
+      </select>
+      <select value={pd || ''} onChange={e => update(py, pm, Number(e.target.value))} aria-label="태어난 날">
+        <option value="">일</option>
+        {Array.from({ length: daysIn }, (_, i) => i + 1).map(v => <option key={v} value={v}>{v}일</option>)}
+      </select>
+    </div>
+  )
+}
+
+const BirthTimePicker: React.FC<{ value: string; onChange: (v: string) => void }> = ({ value, onChange }) => {
+  const [h, min] = value ? value.split(':').map(Number) : [-1, 0]
+  const hourLabel = (v: number) => `${v < 12 ? '오전' : '오후'} ${v % 12 === 0 ? 12 : v % 12}시`
+  return (
+    <div className="picker-row">
+      <select value={h} onChange={e => { const nh = Number(e.target.value); onChange(nh < 0 ? '' : `${pad(nh)}:${pad(min)}`) }} aria-label="태어난 시">
+        <option value={-1}>모름</option>
+        {Array.from({ length: 24 }, (_, i) => i).map(v => <option key={v} value={v}>{hourLabel(v)}</option>)}
+      </select>
+      <select value={min} disabled={h < 0} onChange={e => onChange(`${pad(h)}:${pad(Number(e.target.value))}`)} aria-label="태어난 분">
+        {Array.from({ length: 12 }, (_, i) => i * 5).map(v => <option key={v} value={v}>{v}분</option>)}
+      </select>
+    </div>
   )
 }
 
@@ -516,6 +564,9 @@ const TodayStyle: React.FC = () => (
     .setup-form label, .setup-label { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-sm); font-weight: 700; color: var(--text-main); }
     .setup-label { flex-direction: row; align-items: center; gap: 6px; }
     .setup-form small { font-weight: 400; color: var(--text-sub); }
+    .picker-row { display: flex; gap: 6px; }
+    .picker-row select { flex: 1; min-width: 0; height: 44px; padding: 0 8px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-main); font-size: 16px; font-family: inherit; }
+    .picker-row select:disabled { opacity: 0.5; }
     .setup-form input { height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-main); font-size: 16px; width: 100%; }
     .setup-key { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--border); }
     .seg { display: flex; padding: 3px; border-radius: 12px; background: var(--surface-2); }
