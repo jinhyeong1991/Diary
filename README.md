@@ -23,9 +23,7 @@
 ## 2. GitHub Pages 배포
 
 1. GitHub 저장소 **Settings → Pages → Source: GitHub Actions**
-2. **Settings → Secrets and variables → Actions → Variables** 탭에 추가
-   - `VITE_SUPABASE_URL` = Project URL
-   - `VITE_SUPABASE_ANON_KEY` = anon public 키
+2. `.env.production` 에 Project URL 과 anon public 키 입력
 3. `main` 브랜치에 push 하면 자동 배포 → `https://<아이디>.github.io/Diary/`
 
 anon 키는 공개돼도 되는 키입니다. 데이터 접근은 `schema.sql` 의 RLS 정책(초대 명단)이 막습니다.
