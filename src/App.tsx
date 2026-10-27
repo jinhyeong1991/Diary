@@ -321,6 +321,15 @@ const App: React.FC = () => {
           background-color: rgba(0, 122, 255, 0.1);
         }
 
+        .logo, .desktop-nav-item, .user-profile, .date-display {
+          white-space: nowrap;
+        }
+
+        @media (max-width: 1100px) {
+          .date-display { display: none; }
+          .desktop-nav-item { padding: 8px 10px; }
+        }
+
         @media (min-width: 769px) {
           .desktop-nav {
             display: flex;
