@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCw, ChevronLeft, ChevronRight, Mail, ExternalLink, Sparkles, Settings2, KeyRound } from 'lucide-react'
+import { RefreshCw, ChevronLeft, ChevronRight, Mail, ExternalLink, Sparkles, Settings2, KeyRound, Eye, EyeOff, ClipboardPaste } from 'lucide-react'
 import { useUserStore } from '../store/useStore'
 import type { FortuneProfile, FortuneResult } from '../store/useStore'
 import { fetchWeather, describeWeather, dustGrade, weatherTip } from '../lib/weather'
@@ -344,7 +344,18 @@ const FortuneSetup: React.FC<{ onDone: () => void; onBack: () => void }> = ({ on
   const { name, fortuneProfile, geminiApiKey, setFortuneProfile, setGeminiApiKey, fortunes } = useUserStore()
   const [form, setForm] = useState<FortuneProfile>(fortuneProfile ?? { name: name === '사용자' ? '' : name, gender: 'male', birthDate: '', birthTime: '', calendar: 'solar' })
   const [key, setKey] = useState(geminiApiKey)
+  const [showKey, setShowKey] = useState(false)
   const [msg, setMsg] = useState('')
+
+  const pasteKey = async () => {
+    try {
+      const text = (await navigator.clipboard.readText()).trim()
+      if (!text) { setMsg('클립보드가 비어 있어요. 키를 먼저 복사해 주세요.'); return }
+      setKey(text); setMsg('')
+    } catch {
+      setMsg('붙여넣기 권한이 없어요. 입력칸을 길게 눌러 "붙여넣기"를 선택해 주세요.')
+    }
+  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -391,7 +402,18 @@ const FortuneSetup: React.FC<{ onDone: () => void; onBack: () => void }> = ({ on
 
           <div className="setup-key">
             <div className="setup-label"><KeyRound size={14} /> Google AI Studio API 키</div>
-            <input type="password" value={key} onChange={e => setKey(e.target.value)} placeholder="AIza로 시작하는 키" autoComplete="off" spellCheck={false} />
+            {/* type=password 는 일부 휴대폰 키보드가 붙여넣기를 막아서 text + 가림 처리 */}
+            <div className="key-row">
+              <input
+                type="text" value={key} onChange={e => setKey(e.target.value.trim())}
+                className={showKey ? '' : 'masked'} placeholder="AIza로 시작하는 키"
+                autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false}
+              />
+              <button type="button" className="key-btn" onClick={() => setShowKey(s => !s)} aria-label={showKey ? '키 숨기기' : '키 보기'}>
+                {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            <button type="button" className="key-paste" onClick={pasteKey}><ClipboardPaste size={16} /> 복사한 키 붙여넣기</button>
             <p className="today-muted">
               <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> 에서 무료로 만들 수 있어요.
               키는 내 계정에만 저장되고 팀원은 볼 수 없습니다.
@@ -569,6 +591,11 @@ const TodayStyle: React.FC = () => (
     .picker-row select:disabled { opacity: 0.5; }
     .setup-form input { height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-main); font-size: 16px; width: 100%; }
     .setup-key { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed var(--border); }
+    .key-row { display: flex; gap: 6px; }
+    .key-row input { flex: 1; min-width: 0; }
+    .key-row input.masked { -webkit-text-security: disc; }
+    .key-btn { width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--surface-2); color: var(--text-sub); border: 1px solid var(--border); }
+    .key-paste { display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 12px; border: 1px dashed var(--primary); color: var(--primary); font-weight: 700; font-size: var(--fs-sm); }
     .seg { display: flex; padding: 3px; border-radius: 12px; background: var(--surface-2); }
     .seg button { flex: 1; height: 38px; border-radius: 10px; font-weight: 700; color: var(--text-sub); }
     .seg button.on { background: var(--card-bg); color: var(--primary); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
