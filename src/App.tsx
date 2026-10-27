@@ -15,7 +15,8 @@ import {
   X,
   Users,
   Cloud,
-  CloudOff
+  CloudOff,
+  CloudSun
 } from 'lucide-react'
 import { useUserStore, useScheduleStore, useMemoStore } from './store/useStore'
 import {
@@ -31,6 +32,7 @@ import VacationView from './features/VacationView'
 import SchedulerView from './features/SchedulerView'
 import SettingsView from './features/SettingsView'
 import TeamView from './features/TeamView'
+import TodayView from './features/TodayView'
 import DayNav from './components/DayNav'
 import { initCloudSync, useCloudStore } from './sync/cloudSync'
 import { isCloudEnabled } from './lib/supabase'
@@ -53,7 +55,7 @@ function useTodayDate(): string {
 }
 
 // Types
-type ViewType = 'home' | 'vacation' | 'scheduler' | 'memo' | 'team' | 'settings'
+type ViewType = 'home' | 'today' | 'vacation' | 'scheduler' | 'memo' | 'team' | 'settings'
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true)
@@ -116,6 +118,7 @@ const App: React.FC = () => {
             {/* Desktop Navigation */}
             <nav className="desktop-nav">
               <button className={`desktop-nav-item ${activeView === 'home' ? 'active' : ''}`} onClick={() => setActiveView('home')}>홈</button>
+              <button className={`desktop-nav-item ${activeView === 'today' ? 'active' : ''}`} onClick={() => setActiveView('today')}>오늘</button>
               <button className={`desktop-nav-item ${activeView === 'vacation' ? 'active' : ''}`} onClick={() => setActiveView('vacation')}>연차</button>
               <button className={`desktop-nav-item ${activeView === 'scheduler' ? 'active' : ''}`} onClick={() => setActiveView('scheduler')}>일정</button>
               <button className={`desktop-nav-item ${activeView === 'memo' ? 'active' : ''}`} onClick={() => setActiveView('memo')}>메모</button>
@@ -151,6 +154,7 @@ const App: React.FC = () => {
             {signedOut && <LoginBanner onLogin={() => setLoginOpen(true)} />}
             <AnimatePresence mode="wait">
               {activeView === 'home' && <HomeView key="home" />}
+              {activeView === 'today' && <TodayView key="today" />}
               {activeView === 'vacation' && <VacationView key="vacation" />}
               {activeView === 'scheduler' && <SchedulerView key="scheduler" />}
               {activeView === 'memo' && <MemoView key="memo" />}
@@ -164,6 +168,7 @@ const App: React.FC = () => {
           {/* Mobile Bottom Tab Bar */}
           <nav className="mobile-nav">
             <NavItem icon={<Home size={22} />} label="홈" active={activeView === 'home'} onClick={() => setActiveView('home')} />
+            <NavItem icon={<CloudSun size={22} />} label="오늘" active={activeView === 'today'} onClick={() => setActiveView('today')} />
             <NavItem icon={<Calendar size={22} />} label="연차" active={activeView === 'vacation'} onClick={() => setActiveView('vacation')} />
             <NavItem icon={<Clock size={22} />} label="일정" active={activeView === 'scheduler'} onClick={() => setActiveView('scheduler')} />
             <NavItem icon={<StickyNote size={22} />} label="메모" active={activeView === 'memo'} onClick={() => setActiveView('memo')} />

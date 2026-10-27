@@ -9,6 +9,29 @@ interface TeamMember {
   color: string
 }
 
+export interface FortuneProfile {
+  name: string
+  gender: 'male' | 'female'
+  birthDate: string // YYYY-MM-DD
+  birthTime: string // HH:MM, 모르면 ''
+  calendar: 'solar' | 'lunar'
+}
+
+export interface FortuneItem { score: number; text: string }
+
+export interface FortuneResult {
+  date: string
+  summary: string
+  total: FortuneItem
+  money: FortuneItem
+  love: FortuneItem
+  work: FortuneItem
+  health: FortuneItem
+  relationship: FortuneItem
+  lucky: { color: string; number: string; direction: string; item: string; time: string }
+  advice: string
+}
+
 interface UserState {
   name: string
   joinDate: string
@@ -18,6 +41,12 @@ interface UserState {
   teamMembers: TeamMember[]
   teamVacations: Record<string, string[]> // date -> member IDs (연차)
   teamHalfDayVacations: Record<string, string[]> // date -> member IDs (반차)
+  fortuneProfile: FortuneProfile | null
+  geminiApiKey: string // 본인 계정(user-storage)에만 저장, 팀원은 읽을 수 없음
+  fortunes: Record<string, FortuneResult> // date -> 그날 운세 (최근 14일만 보관)
+  setFortuneProfile: (profile: FortuneProfile) => void
+  setGeminiApiKey: (key: string) => void
+  saveFortune: (result: FortuneResult) => void
   setName: (name: string) => void
   setJoinDate: (date: string) => void
   setUsedVacation: (days: number) => void
@@ -40,6 +69,15 @@ export const useUserStore = create<UserState>()(
       teamMembers: [],
       teamVacations: {},
       teamHalfDayVacations: {},
+      fortuneProfile: null,
+      geminiApiKey: '',
+      fortunes: {},
+      setFortuneProfile: (fortuneProfile) => set({ fortuneProfile }),
+      setGeminiApiKey: (geminiApiKey) => set({ geminiApiKey }),
+      saveFortune: (result) => set((state) => {
+        const kept = Object.keys(state.fortunes).sort().slice(-13)
+        return { fortunes: { ...Object.fromEntries(kept.map(d => [d, state.fortunes[d]])), [result.date]: result } }
+      }),
       setName: (name) => set({ name }),
       setJoinDate: (joinDate) => set({ joinDate }),
       setUsedVacation: (usedVacation) => set({ usedVacation }),
