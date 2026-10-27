@@ -1,0 +1,25 @@
+# 공개 저장소이므로 앱 소스만 올리고 나머지는 전부 제외 (화이트리스트 방식)
+/*
+!/.gitignore
+!/.github/
+!/.env.example
+!/README.md
+!/index.html
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/tsconfig.node.json
+!/vite.config.ts
+!/server.js
+!/start.bat
+!/prd.md
+!/public/
+!/src/
+!/supabase/
+
+# 혹시 들어가면 안 되는 것
+.env
+.env.local
+*.local
+node_modules/
+dist/
