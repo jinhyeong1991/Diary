@@ -147,12 +147,13 @@ async function initialSync(userId: string) {
     }
     // 양쪽 다 바뀜 → 사용자에게 선택
     const label = key === 'memo-storage' ? '메모' : key === 'schedule-storage' ? '일정·연차' : '설정·팀원'
-    const keepLocal = window.confirm(
+    // 실수로 눌러도 서버 기록이 지워지지 않도록 '확인' 쪽을 안전한 선택(서버 가져오기)으로 둠
+    const takeServer = window.confirm(
       `[${label}] 이 기기와 서버의 데이터가 다릅니다.\n\n` +
-      `확인 = 이 기기 데이터로 서버를 덮어쓰기\n취소 = 서버 데이터를 이 기기로 가져오기`
+      `확인 = 서버 데이터를 이 기기로 가져오기 (권장)\n취소 = 이 기기 데이터로 서버를 덮어쓰기`
     )
-    if (keepLocal) await upload(key)
-    else await applyRemote(key, remote.data, remote.updated_at)
+    if (takeServer) await applyRemote(key, remote.data, remote.updated_at)
+    else await upload(key)
   }
 }
 
