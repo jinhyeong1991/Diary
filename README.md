@@ -15,7 +15,7 @@
    insert into public.team_allowlist (email, is_admin) values ('내이메일@회사.com', true);
    ```
 4. **Authentication → URL Configuration**
-   - Site URL: `https://<깃허브아이디>.github.io/My-Local-Pulse/`
+   - Site URL: `https://<깃허브아이디>.github.io/Diary/`
    - Redirect URLs 에 위 주소와 `http://localhost:3000/` 추가
 5. (선택) **Authentication → Email Templates → Magic Link** 에 `{{ .Token }}` 을 넣으면 메일에 6자리 코드도 함께 옵니다. 모바일에서 메일 앱 링크가 다른 브라우저로 열릴 때 코드 입력이 편합니다.
 6. **Project Settings → API** 에서 `Project URL` 과 `anon public` 키 복사
@@ -26,7 +26,7 @@
 2. **Settings → Secrets and variables → Actions → Variables** 탭에 추가
    - `VITE_SUPABASE_URL` = Project URL
    - `VITE_SUPABASE_ANON_KEY` = anon public 키
-3. `main` 브랜치에 push 하면 자동 배포 → `https://<아이디>.github.io/My-Local-Pulse/`
+3. `main` 브랜치에 push 하면 자동 배포 → `https://<아이디>.github.io/Diary/`
 
 anon 키는 공개돼도 되는 키입니다. 데이터 접근은 `schema.sql` 의 RLS 정책(초대 명단)이 막습니다.
 
