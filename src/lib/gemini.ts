@@ -97,6 +97,69 @@ export async function fetchFortune(apiKey: string, profile: FortuneProfile, date
   throw new Error(friendlyError(lastError))
 }
 
+// 오늘의 운세 그림: Gemini 이미지 모델로 생성 → 휴대폰 저장 공간을 아끼려고 작은 JPEG 로 줄여서 돌려줌
+const IMAGE_MODELS = ['gemini-2.5-flash-image', 'gemini-2.5-flash-image-preview']
+
+function buildImagePrompt(r: FortuneResult, p: FortuneProfile): string {
+  return [
+    'Create a single cheerful retro 16-bit pixel art illustration for a daily fortune card.',
+    `Theme of the day: "${r.summary}" (Korean). Mood: ${r.total.score >= 80 ? 'bright, lucky, celebratory' : r.total.score >= 60 ? 'warm, hopeful' : 'calm, gentle, encouraging'}.`,
+    `Include the lucky color (${r.lucky.color}) as the main accent and the lucky item (${r.lucky.item}) somewhere in the scene.`,
+    `A small friendly ${p.gender === 'male' ? 'boy' : 'girl'} pixel character and the ${zodiacEnglish(p.birthDate)} of the Korean zodiac as a cute companion.`,
+    'Cozy magical fortune-teller atmosphere with stars and soft sparkles.',
+    'Original characters only — do not depict any existing game, anime, or brand characters. No text, letters, or numbers in the image.',
+  ].join(' ')
+}
+
+const ZODIAC_EN = ['monkey', 'rooster', 'dog', 'pig', 'rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep']
+function zodiacEnglish(birthDate: string): string {
+  const y = Number(birthDate.slice(0, 4))
+  return y ? ZODIAC_EN[y % 12] : 'cat'
+}
+
+function shrinkImage(dataUrl: string, maxSide = 640): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', 0.85))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
+}
+
+export async function fetchFortuneImage(apiKey: string, result: FortuneResult, profile: FortuneProfile): Promise<string> {
+  let lastError = ''
+  for (const model of IMAGE_MODELS) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: buildImagePrompt(result, profile) }] }],
+        generationConfig: { responseModalities: ['IMAGE'] },
+      }),
+    })
+    const body = await res.json().catch(() => null)
+    if (res.ok) {
+      const parts: { inlineData?: { mimeType: string; data: string } }[] = body?.candidates?.[0]?.content?.parts ?? []
+      const inline = parts.find(p => p.inlineData)?.inlineData
+      if (!inline) throw new Error('그림이 만들어지지 않았어요. 다시 시도해 주세요.')
+      return shrinkImage(`data:${inline.mimeType};base64,${inline.data}`)
+    }
+    lastError = body?.error?.message || `HTTP ${res.status}`
+    if (res.status !== 404) break
+  }
+  if (/quota|RESOURCE_EXHAUSTED|billing|free tier|limit: 0/i.test(lastError)) {
+    throw new Error('이 API 키로는 지금 그림을 만들 수 없어요. 무료 사용량을 다 썼거나, 그림 생성에 Google AI Studio 결제 설정이 필요할 수 있어요.')
+  }
+  throw new Error(friendlyError(lastError))
+}
+
 function friendlyError(m: string): string {
   if (/API key not valid|API_KEY_INVALID/i.test(m)) return 'API 키가 올바르지 않습니다. 키를 다시 확인해 주세요.'
   if (/quota|RESOURCE_EXHAUSTED|rate/i.test(m)) return '오늘 사용할 수 있는 무료 호출량을 넘었습니다. 잠시 후 다시 시도해 주세요.'

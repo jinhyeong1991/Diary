@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCw, ChevronLeft, ChevronRight, Mail, ExternalLink, Sparkles, Settings2, KeyRound, Eye, EyeOff, ClipboardPaste } from 'lucide-react'
+import { RefreshCw, ChevronLeft, ChevronRight, Mail, ExternalLink, Sparkles, Settings2, KeyRound, Eye, EyeOff, ClipboardPaste, Image as ImageIcon } from 'lucide-react'
 import { useUserStore } from '../store/useStore'
 import type { FortuneProfile, FortuneResult } from '../store/useStore'
 import { fetchWeather, describeWeather, dustGrade, weatherTip } from '../lib/weather'
 import type { WeatherData } from '../lib/weather'
-import { fetchFortune, zodiacAnimal, starSign, ageOf } from '../lib/gemini'
+import { fetchFortune, fetchFortuneImage, zodiacAnimal, starSign, ageOf } from '../lib/gemini'
 import { localDateStr } from '../utils/dateUtils'
 import { isGmailEnabled, getStoredToken, wasConnected, connectGmail, disconnectGmail, fetchUnread, threadUrl } from '../lib/gmail'
 import type { MailItem } from '../lib/gmail'
@@ -298,6 +298,8 @@ const FortunePage: React.FC<{ onBack: () => void; onSetup: () => void }> = ({ on
 
       {result && (
         <>
+          <FortuneImage result={result} profile={fortuneProfile} apiKey={geminiApiKey} />
+
           <section className="glass-card fortune-scores">
             {FORTUNE_ITEMS.slice(1).map(it => (
               <div key={it.key} className="fortune-bar-row">
@@ -336,6 +338,53 @@ const FortunePage: React.FC<{ onBack: () => void; onSetup: () => void }> = ({ on
         </>
       )}
     </>
+  )
+}
+
+/* ───────── 오늘의 운세 그림 (버튼을 눌렀을 때만 생성, 이 기기에 오늘 것 1장만 보관) ───────── */
+const IMAGE_KEY = 'pulse-fortune-image'
+
+function loadSavedImage(date: string): string | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(IMAGE_KEY) || 'null') as { date: string; dataUrl: string } | null
+    return saved?.date === date ? saved.dataUrl : null
+  } catch { return null }
+}
+
+const FortuneImage: React.FC<{ result: FortuneResult; profile: FortuneProfile; apiKey: string }> = ({ result, profile, apiKey }) => {
+  const [image, setImage] = useState<string | null>(() => loadSavedImage(result.date))
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const generate = async () => {
+    setLoading(true); setError('')
+    try {
+      const dataUrl = await fetchFortuneImage(apiKey, result, profile)
+      setImage(dataUrl)
+      try { localStorage.setItem(IMAGE_KEY, JSON.stringify({ date: result.date, dataUrl })) } catch { /* 저장 공간 부족 시 화면에만 표시 */ }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <section className="glass-card fortune-image">
+      {image ? (
+        <>
+          <img src={image} alt={`오늘의 운세 그림: ${result.summary}`} />
+          <button className="fortune-image-again" onClick={generate} disabled={loading}>
+            <RefreshCw size={14} className={loading ? 'spin' : ''} /> {loading ? '다시 그리는 중...' : '다른 그림으로 다시 그리기'}
+          </button>
+        </>
+      ) : (
+        <button className="fortune-image-make" onClick={generate} disabled={loading}>
+          {loading
+            ? <><Sparkles size={18} className="spin" /> 그림 그리는 중... (10~30초)</>
+            : <><ImageIcon size={18} /> 오늘의 운세 그림 만들기</>}
+        </button>
+      )}
+      {error && <p className="fortune-error-text">{error}</p>}
+    </section>
   )
 }
 
@@ -568,6 +617,11 @@ const TodayStyle: React.FC = () => (
     .fortune-total { display: flex; align-items: center; gap: 16px; }
     .fortune-summary { font-size: var(--fs-md); font-weight: 700; color: var(--text-main); line-height: 1.5; }
     .fortune-error p, .fortune-error-text { color: var(--danger); font-size: var(--fs-sm); margin-bottom: 8px; }
+    .fortune-image { display: flex; flex-direction: column; gap: 10px; }
+    .fortune-image img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; display: block; background: var(--surface-2); }
+    .fortune-image-make { display: flex; align-items: center; justify-content: center; gap: 8px; height: 56px; border-radius: 12px; border: 2px dashed var(--primary); color: var(--primary); font-weight: 800; font-size: var(--fs-base); }
+    .fortune-image-make .spin, .fortune-image-again .spin { animation: todaySpin 1.2s linear infinite; }
+    .fortune-image-again { align-self: center; display: flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--text-sub); padding: 6px 10px; }
     .fortune-scores { display: flex; flex-direction: column; gap: 10px; }
     .fortune-bar-row { display: grid; grid-template-columns: 104px 1fr 30px; align-items: center; gap: 8px; }
     .fortune-bar-label { font-size: var(--fs-sm); color: var(--text-main); white-space: nowrap; }
