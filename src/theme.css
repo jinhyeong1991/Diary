@@ -1,31 +1,43 @@
 /*
- * 공통 디자인 시스템 (모바일 우선)
+ * 공통 디자인 시스템 (픽셀 레트로 픽셀 테마 · 모바일 360px 우선)
  * 각 화면 컴포넌트 안의 <style> 보다 우선하도록 .app-container 로 범위를 지정함
  */
 
 :root {
-  --fs-xs: 0.75rem;   /* 12px 보조 라벨 */
-  --fs-sm: 0.8125rem; /* 13px 설명 */
+  --fs-xs: 0.75rem;     /* 12px 보조 라벨 */
+  --fs-sm: 0.8125rem;   /* 13px 설명 */
   --fs-base: 0.9375rem; /* 15px 본문 */
-  --fs-md: 1rem;      /* 16px 카드 제목 */
-  --fs-lg: 1.125rem;  /* 18px 섹션 제목 */
-  --fs-xl: 1.375rem;  /* 22px 큰 숫자 */
+  --fs-md: 1rem;        /* 16px 카드 제목 / 모바일 입력칸 */
+  --fs-lg: 1.125rem;    /* 18px 섹션 제목 */
+  --fs-xl: 1.375rem;    /* 22px 큰 숫자 */
 
-  --card-bg: #FFFFFF;
-  --card-border: rgba(0, 0, 0, 0.06);
-  --card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.05);
-  --surface-2: #F2F4F7;
-  --primary-soft: rgba(0, 122, 255, 0.1);
-  --radius-card: 18px;
+  --card-bg: #FFFDF7;
+  --card-border: #181818;
+  --card-shadow: 4px 4px 0px #181818;
+  --surface-2: #F4EFE0;
+  --surface-3: #E8DEC5;
+  --primary-soft: rgba(229, 37, 33, 0.14);
+  --gold-soft: rgba(251, 208, 0, 0.25);
+  --emerald-soft: rgba(0, 168, 0, 0.14);
+  --cyan-soft: rgba(36, 184, 168, 0.16);
+  --radius-card: 6px;
   --gap: 14px;
+
+  /* 버튼 텍스트 대비 색상 */
+  --btn-primary-text: #FFFFFF;
 }
 
 [data-theme='dark'] {
-  --card-bg: #1C1C1E;
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-shadow: none;
-  --surface-2: #2C2C2E;
-  --primary-soft: rgba(10, 132, 255, 0.18);
+  --card-bg: #1B203E;
+  --card-border: #4AEDD9;
+  --card-shadow: 4px 4px 0px #050711;
+  --surface-2: #252C52;
+  --surface-3: #303968;
+  --primary-soft: rgba(251, 208, 0, 0.18);
+  --gold-soft: rgba(251, 208, 0, 0.22);
+  --emerald-soft: rgba(56, 229, 77, 0.18);
+  --cyan-soft: rgba(74, 237, 217, 0.18);
+  --btn-primary-text: #181818;
 }
 
 body {
@@ -35,14 +47,32 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ───────── 카드 · 레이아웃 ───────── */
-.app-container .glass-card {
+/* ───────── 레트로 픽셀 카드 · 블록 레이아웃 ───────── */
+.app-container .glass-card,
+.app-container .team-card,
+.app-container .auth-card {
+  position: relative;
   background: var(--card-bg);
-  border: 1px solid var(--card-border);
+  border: 3px solid var(--card-border);
   border-radius: var(--radius-card);
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--card-shadow), var(--pixel-highlight);
   padding: 18px;
   min-width: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* 카드 상단 코너 픽셀 리벳 장식 */
+.app-container .glass-card::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-gold);
+  box-shadow: -10px 0 0 var(--accent-brick);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .app-container .view-container {
@@ -52,50 +82,73 @@ body {
   min-width: 0;
 }
 
-.app-container .glass-card h3 {
+.app-container .glass-card h3,
+.app-container .team-card h3,
+.app-container .auth-card h3 {
+  font-family: var(--font-pixel);
   font-size: var(--fs-md);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
+  color: var(--text-main);
 }
 
+/* 모바일 자동 확대 방지를 위해 모든 입력칸 16px 이상 보장 */
 .app-container input,
 .app-container select,
 .app-container textarea {
   font-family: inherit;
+  font-size: 16px !important;
+  color: var(--text-main);
 }
 
-/* ───────── 날짜 이동 (DayNav) ───────── */
+/* ───────── 레트로 3D 픽셀 버튼 효과 ───────── */
+.app-container button {
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+.app-container button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+}
+
+/* ───────── 날짜 이동 (DayNav - 스테이지 선택 바 감성) ───────── */
 .app-container .day-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 .app-container .day-nav-arrow {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--card-border);
+  box-shadow: var(--pixel-shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-main);
-  background: var(--surface-2);
+  background: var(--accent-gold);
+  color: #181818;
   flex-shrink: 0;
+  font-weight: 800;
 }
 .app-container .day-nav-label {
   position: relative;
   flex: 1;
   min-width: 0;
   text-align: center;
+  font-family: var(--font-pixel);
   font-size: var(--fs-md);
   font-weight: 700;
   color: var(--text-main);
+  background: var(--surface-2);
+  border: 2px solid var(--card-border);
   cursor: pointer;
   padding: 8px 4px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 .app-container .day-nav-label .sun { color: var(--danger); }
-.app-container .day-nav-label .sat { color: var(--primary); }
+.app-container .day-nav-label .sat { color: var(--accent-sky); }
+[data-theme='dark'] .app-container .day-nav-label .sat { color: var(--accent-cyan); }
 .app-container .day-nav-label input[type='date'] {
   position: absolute;
   inset: 0;
@@ -105,21 +158,27 @@ body {
   cursor: pointer;
 }
 .app-container .day-nav-today {
-  height: 32px;
+  height: 40px;
   padding: 0 12px;
-  border-radius: 16px;
-  background: var(--primary-soft);
-  color: var(--primary);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--card-border);
+  box-shadow: var(--pixel-shadow-sm);
+  background: var(--secondary);
+  color: #FFFFFF;
+  font-family: var(--font-pixel);
   font-size: var(--fs-sm);
   font-weight: 700;
   flex-shrink: 0;
-  margin-left: 4px;
+  margin-left: 2px;
+}
+[data-theme='dark'] .app-container .day-nav-today {
+  color: #181818;
 }
 .app-container .day-nav-today.hidden {
   visibility: hidden;
 }
 
-/* 공통 섹션 헤더 */
+/* 공통 섹션 헤더 & 코인 배지 */
 .app-container .section-title {
   display: flex;
   align-items: center;
@@ -129,69 +188,208 @@ body {
 }
 .app-container .section-title h3 { margin: 0; }
 .app-container .pill {
+  font-family: var(--font-pixel);
   font-size: var(--fs-xs);
   font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--primary-soft);
-  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--card-border);
+  background: var(--accent-gold);
+  color: #181818;
+  box-shadow: var(--pixel-shadow-sm);
   white-space: nowrap;
 }
 
-/* ───────── 하단 탭바 ───────── */
+/* ───────── 하단 탭바 (게임 핫바 & 아케이드 슬롯 감성) ───────── */
+.app-container .mobile-nav {
+  background: var(--card-bg);
+  border-top: 3px solid var(--card-border);
+  box-shadow: 0 -3px 0 rgba(0, 0, 0, 0.15);
+  gap: 4px;
+  padding: 4px 6px;
+}
 .app-container .nav-item {
-  gap: 3px;
-  padding: 6px 0;
+  gap: 2px;
+  padding: 4px 2px;
+  min-height: 48px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-sub);
 }
 .app-container .nav-item.active {
-  transform: none;
+  transform: translateY(-2px);
+  background: var(--surface-2);
+  border-color: var(--card-border);
+  box-shadow: var(--pixel-shadow-sm);
+  color: var(--primary);
 }
 .app-container .nav-item .nav-icon {
-  width: 44px;
-  height: 28px;
-  border-radius: 14px;
-  transition: background 0.2s;
+  width: 38px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
 }
 .app-container .nav-item.active .nav-icon {
-  background: var(--primary-soft);
+  background: var(--gold-soft);
 }
 .app-container .nav-item .nav-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 .app-container .nav-label {
+  font-family: var(--font-pixel);
   font-size: 0.6875rem;
 }
 
-/* ───────── 홈 ───────── */
+/* ───────── 홈: 레트로 히어로 배너 & 캐릭터 무대 ───────── */
+.app-container .welcome-card {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--accent-sky);
+  background-size: cover;
+  background-position: center bottom;
+  padding: 18px 16px 56px 16px;
+  border: 3px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+.app-container .welcome-card::after {
+  display: none;
+}
+.app-container .retro-signboard {
+  position: relative;
+  z-index: 2;
+  background: #C84C0C;
+  border: 3px solid #181818;
+  box-shadow: inset 2px 2px 0px #FCA044, inset -2px -2px 0px #7C2800, 3px 3px 0px #181818;
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: #FFFDF7;
+  max-width: 100%;
+}
+[data-theme='dark'] .app-container .retro-signboard {
+  background: #1B2854;
+  border-color: #4AEDD9;
+  box-shadow: inset 2px 2px 0px #3B529E, inset -2px -2px 0px #0B1128, 3px 3px 0px #050711;
+}
 .app-container .welcome-card h2 {
+  font-family: var(--font-pixel);
   font-size: var(--fs-lg);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 2px;
+  color: #FFFDF7;
+  text-shadow: 2px 2px 0px #181818;
+  margin-bottom: 4px;
 }
 .app-container .welcome-card p {
   font-size: var(--fs-sm);
-  color: var(--text-sub);
+  color: #FFE6A3;
+  text-shadow: 1px 1px 0px #181818;
+}
+
+/* 움직이는 캐릭터 스테이지 트랙 */
+.app-container .retro-stage-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 44px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+}
+.app-container .sprite-runner {
+  position: absolute;
+  bottom: 0;
+  width: 38px;
+  height: 38px;
+  animation: patrolRight 9s linear infinite;
+}
+.app-container .sprite-robot {
+  position: absolute;
+  bottom: 0;
+  width: 38px;
+  height: 38px;
+  animation: patrolRobot 11s ease-in-out infinite;
+}
+.app-container .sprite-slime {
+  position: absolute;
+  bottom: 0;
+  width: 30px;
+  height: 30px;
+  animation: patrolLeft 12s linear infinite;
+}
+.app-container .sprite-ghost {
+  position: absolute;
+  bottom: 0;
+  width: 32px;
+  height: 32px;
+  right: 14px;
+  animation: bobUp 1.4s ease-in-out infinite;
+}
+.app-container .sprite-block {
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+@keyframes patrolRight {
+  0%   { left: -42px; transform: translateY(0); }
+  25%  { transform: translateY(-10px); }
+  30%  { transform: translateY(0); }
+  65%  { transform: translateY(-12px); }
+  70%  { transform: translateY(0); }
+  100% { left: calc(100% + 42px); transform: translateY(0); }
+}
+
+@keyframes patrolRobot {
+  0%   { left: 12%; transform: scaleX(1); }
+  48%  { left: 58%; transform: scaleX(1); }
+  50%  { left: 58%; transform: scaleX(-1); }
+  98%  { left: 12%; transform: scaleX(-1); }
+  100% { left: 12%; transform: scaleX(1); }
+}
+
+@keyframes patrolLeft {
+  0%   { left: calc(100% + 36px); }
+  100% { left: -36px; }
+}
+
+@keyframes bobUp {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* ───────── 스탯 카드 & 입력 폼 ───────── */
+.app-container .stat-card {
+  background: linear-gradient(180deg, var(--card-bg) 0%, var(--surface-2) 100%);
 }
 .app-container .stat-card h3 {
+  font-family: var(--font-pixel);
   font-size: var(--fs-sm);
   color: var(--text-sub);
-  font-weight: 600;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .app-container .vacation-value {
+  font-family: var(--font-pixel);
   font-size: var(--fs-xl);
   letter-spacing: -0.02em;
   white-space: nowrap;
+  color: var(--primary);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.15);
 }
 .app-container .home-memo-textarea,
 .app-container .memo-textarea {
-  font-size: var(--fs-base);
+  font-size: 16px !important;
   line-height: 1.6;
   background: var(--surface-2);
-  border: 1px solid transparent;
-  border-radius: 12px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.08);
   padding: 12px 14px;
+  color: var(--text-main);
 }
 .app-container .home-memo-textarea:focus,
 .app-container .memo-textarea:focus {
@@ -200,17 +398,25 @@ body {
 }
 .app-container .quick-add-form {
   background: var(--surface-2);
-  border-radius: 12px;
-  padding: 6px 6px 6px 14px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.06);
+  padding: 6px 6px 6px 12px;
   align-items: center;
 }
-.app-container .quick-add-form input { min-width: 0; font-size: var(--fs-base); }
+.app-container .quick-add-form input {
+  min-width: 0;
+  font-size: 16px !important;
+  color: var(--text-main);
+}
 .app-container .quick-add-form button {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--primary);
-  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--card-border);
+  box-shadow: var(--pixel-shadow-sm);
+  background: var(--accent-gold);
+  color: #181818;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,32 +424,51 @@ body {
 }
 .app-container .home-task-item {
   background: var(--surface-2);
-  border-radius: 12px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--pixel-shadow-sm);
   padding: 10px 12px;
 }
-.app-container .task-edit-input { min-width: 0; font-size: var(--fs-base); }
+.app-container .task-edit-input {
+  min-width: 0;
+  font-size: 16px !important;
+}
 
 /* 백업 바: 버튼이 화면 밖으로 밀리지 않게 줄바꿈 */
 .app-container .backup-bar {
   flex-wrap: wrap;
   overflow: visible;
   background: var(--card-bg);
-  border-color: var(--card-border);
+  border: 3px solid var(--card-border);
   border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
   padding: 12px 14px;
 }
 .app-container .backup-bar-label {
   white-space: normal;
   flex-shrink: 1;
   min-width: 0;
+  font-family: var(--font-pixel);
 }
 .app-container .backup-bar-btns {
   flex-wrap: wrap;
   flex-shrink: 1;
   margin-left: 0;
 }
+.app-container .backup-bar-btn {
+  min-height: 38px;
+  border: 2px solid var(--card-border);
+  box-shadow: var(--pixel-shadow-sm);
+  background: var(--surface-2);
+  color: var(--text-main);
+}
+.app-container .backup-bar-btn.primary {
+  background: var(--primary);
+  color: var(--btn-primary-text);
+  border-color: var(--card-border);
+}
 
-/* ───────── 일정 ───────── */
+/* ───────── 일정 (퀘스트 타임라인) ───────── */
 .app-container .scheduler-header {
   flex-direction: column;
   align-items: stretch;
@@ -252,7 +477,7 @@ body {
 .app-container .sched-summary {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 .app-container .sched-summary-text {
   flex: 1;
@@ -260,23 +485,34 @@ body {
 }
 .app-container .sched-summary-text strong {
   display: block;
+  font-family: var(--font-pixel);
   font-size: var(--fs-md);
 }
 .app-container .sched-summary-text span {
   font-size: var(--fs-sm);
   color: var(--text-sub);
 }
-.app-container .sched-bar {
-  height: 8px;
-  border-radius: 4px;
+/* 게임 경험치 바 스타일 진행바 */
+.app-container .sched-bar,
+.app-container .big-progress-bar {
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid var(--card-border);
   background: var(--surface-2);
   overflow: hidden;
   margin-top: 8px;
 }
-.app-container .sched-bar > div {
+.app-container .sched-bar > div,
+.app-container .big-progress {
   height: 100%;
-  background: var(--primary);
-  border-radius: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--secondary) 0px,
+    var(--secondary) 10px,
+    #181818 10px,
+    #181818 12px
+  );
+  border-radius: 0;
   transition: width 0.4s ease;
 }
 .app-container .schedule-form .input-row {
@@ -284,40 +520,50 @@ body {
 }
 .app-container .time-select {
   flex-shrink: 0;
-  padding: 0 10px;
+  padding: 0 8px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--card-border);
   background: var(--surface-2);
+  color: var(--text-main);
 }
 .app-container .time-select select {
-  font-size: var(--fs-base);
+  font-size: 16px !important;
+  color: var(--text-main);
 }
 .app-container .task-input {
   min-width: 0;
   height: 44px;
   padding: 0 12px;
   background: var(--surface-2);
-  border-radius: 12px;
-  font-size: var(--fs-base);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  font-size: 16px !important;
+  color: var(--text-main);
 }
 .app-container .add-btn {
   flex-shrink: 0;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  box-shadow: none;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--card-border);
+  background: var(--accent-gold);
+  color: #181818;
+  box-shadow: var(--pixel-shadow-sm);
 }
 .app-container .timeline-list { gap: 10px; }
 .app-container .timeline-item { gap: 10px; align-items: center; }
 .app-container .time-label {
-  min-width: 44px;
+  min-width: 48px;
   padding-top: 0;
+  font-family: var(--font-pixel);
   font-size: var(--fs-sm);
+  color: var(--text-main);
 }
 .app-container .item-content {
   padding: 12px 12px 12px 14px;
   gap: 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-card);
 }
 .app-container .item-content:hover { transform: none; }
 .app-container .task-text {
@@ -327,12 +573,12 @@ body {
 }
 .app-container .delete-item-btn {
   opacity: 1;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 .app-container .empty-timeline {
@@ -344,7 +590,7 @@ body {
 .app-container .memo-card h3 {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .app-container .memo-textarea {
   min-height: 160px;
@@ -355,7 +601,7 @@ body {
   justify-content: space-between;
   font-size: var(--fs-xs);
   color: var(--text-sub);
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 /* ───────── 연차 ───────── */
@@ -363,13 +609,52 @@ body {
 .app-container .vacation-stats { gap: 8px; }
 .app-container .stat-item {
   background: var(--surface-2);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--pixel-shadow-sm);
+  padding: 10px 10px;
   min-width: 0;
 }
-.app-container .stat-item .value { font-size: var(--fs-lg); white-space: nowrap; }
+.app-container .stat-item.primary {
+  background: var(--gold-soft);
+  border-color: var(--card-border);
+}
+.app-container .stat-item .value {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-lg);
+  white-space: nowrap;
+}
 .app-container .vac-summary-header h3,
 .app-container .vac-section-header h3 { font-size: var(--fs-md); }
+
+/* ───────── 레트로 스테이지 배너 헤더 (서브 뷰 공용) ───────── */
+.app-container .retro-view-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--card-bg) 100%);
+  border: 3px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+}
+.app-container .retro-view-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.app-container .retro-view-banner-title {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--text-main);
+}
+.app-container .retro-view-banner-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-sub);
+}
 
 /* ───────── 터치 기기: hover 로만 보이던 버튼을 항상 표시 ───────── */
 @media (hover: none) {
@@ -377,33 +662,37 @@ body {
   .app-container .chip-remove-btn,
   .app-container .event-remove-btn,
   .app-container .delete-task-btn {
-    opacity: 1;
+    opacity: 1 !important;
   }
 }
 
-/* ───────── 모바일 ───────── */
+/* ───────── 모바일 (폭 360px 최적화 포함) ───────── */
 @media (max-width: 768px) {
-  .app-container .glass-card { padding: 16px; }
+  .app-container .glass-card,
+  .app-container .team-card,
+  .app-container .auth-card {
+    padding: 14px;
+  }
+  .app-container .welcome-card {
+    padding: 14px 12px 52px 12px;
+  }
   .app-container .desktop-header { height: 56px; }
-  .app-container .logo { font-size: 1.0625rem; }
-  .app-container .clock-display { font-size: var(--fs-md); }
+  .app-container .logo { font-size: 0.95rem; }
+  .app-container .clock-display { font-size: 0.95rem; }
 
   /* 홈: 오늘 일정이 먼저 보이도록 순서 변경 */
-  .app-container .home-main-grid { gap: var(--gap); }
+  .app-container .home-main-grid { gap: var(--gap); display: flex; flex-direction: column; }
   .app-container .home-left-col,
   .app-container .home-right-col { gap: var(--gap); }
-  /* 왼쪽 열을 풀어서 '요약 숫자 → 오늘 일정 → 진행률·달력' 순으로 배치 */
-  .app-container .home-main-grid { display: flex; flex-direction: column; }
   .app-container .home-left-col { display: contents; }
-  .app-container .stat-row { order: -2; }
+  .app-container .stat-row { order: -2; gap: 10px; }
   .app-container .home-right-col { order: -1; }
-  .app-container .stat-row { gap: 10px; }
-  .app-container .stat-card { padding: 14px; }
+  .app-container .stat-card { padding: 12px; }
   .app-container .circular-progress-container {
     width: 132px !important;
     max-width: 132px !important;
   }
-  .app-container .circular-text .percent { font-size: 1.75rem; }
+  .app-container .circular-text .percent { font-size: 1.6rem; }
   .app-container .circular-text .count { font-size: var(--fs-sm); margin-top: 4px; }
   .app-container .today-schedule-card { min-height: 0; }
   .app-container .home-task-list { max-height: none; }
@@ -416,7 +705,8 @@ body {
 }
 
 @media (max-width: 380px) {
-  .app-container .vacation-value { font-size: 1.25rem; }
-  .app-container .day-nav-label { font-size: var(--fs-base); }
-  .app-container .stat-item .value { font-size: var(--fs-md); }
+  .app-container .vacation-value { font-size: 1.15rem; }
+  .app-container .day-nav-label { font-size: 0.875rem; }
+  .app-container .stat-item .value { font-size: 0.95rem; }
+  .app-container .welcome-card h2 { font-size: 1rem; }
 }

@@ -88,8 +88,18 @@ const TeamView: React.FC = () => {
   if (!supabase) {
     return (
       <div className="view-container team-view">
+        <div className="retro-view-banner">
+          <div className="retro-view-banner-left">
+            <img src="./retro/runner.png" alt="" className="retro-sprite" style={{ width: '36px', height: '36px' }} />
+            <div>
+              <div className="retro-view-banner-title">MULTIPLAYER PARTY · 팀 보드</div>
+              <div className="retro-view-banner-sub">로컬 전용 플레이 모드</div>
+            </div>
+          </div>
+          <img src="./retro/ghost.png" alt="" className="retro-sprite" style={{ width: '30px', height: '30px' }} />
+        </div>
         <section className="team-card">
-          <h3>팀 일정</h3>
+          <h3>🎮 팀 일정</h3>
           <p className="team-muted">클라우드(Supabase)가 설정되지 않아 로컬 전용 모드로 실행 중입니다.</p>
         </section>
         <TeamStyle />
@@ -100,6 +110,16 @@ const TeamView: React.FC = () => {
   if (!session || status === 'not-member') {
     return (
       <div className="view-container team-view">
+        <div className="retro-view-banner">
+          <div className="retro-view-banner-left">
+            <img src="./retro/runner.png" alt="" className="retro-sprite" style={{ width: '36px', height: '36px' }} />
+            <div>
+              <div className="retro-view-banner-title">MULTIPLAYER PARTY · 팀 보드</div>
+              <div className="retro-view-banner-sub">로그인하여 파티원들과 실시간 동기화하세요</div>
+            </div>
+          </div>
+          <img src="./retro/robot.png" alt="" className="retro-sprite" style={{ width: '34px', height: '34px' }} />
+        </div>
         <AuthPanel />
         <TeamStyle />
       </div>
@@ -127,6 +147,17 @@ const TeamView: React.FC = () => {
       exit={{ opacity: 0, y: -20 }}
       className="view-container team-view"
     >
+      <div className="retro-view-banner">
+        <div className="retro-view-banner-left">
+          <img src="./retro/runner.png" alt="" className="retro-sprite" style={{ width: '36px', height: '36px' }} />
+          <div>
+            <div className="retro-view-banner-title">MULTIPLAYER PARTY · 팀 현황</div>
+            <div className="retro-view-banner-sub">파티원들의 오늘 퀘스트와 휴가를 실시간 확인하세요</div>
+          </div>
+        </div>
+        <img src="./retro/robot.png" alt="" className="retro-sprite" style={{ width: '34px', height: '34px' }} />
+      </div>
+
       <section className="team-card team-date-bar">
         <button onClick={() => setDate(shiftDate(date, -1))} aria-label="이전 날"><ChevronLeft size={20} /></button>
         <div className="team-date-label">
@@ -170,7 +201,7 @@ const TeamView: React.FC = () => {
               <div className="team-member-head">
                 <span className="team-dot" />
                 <strong>{p.name || displayId(p.email)}</strong>
-                {p.id === session.user.id && <span className="team-me">나</span>}
+                {p.id === session.user.id && <span className="team-me">1P (나)</span>}
                 {leave && <span className={`team-leave ${leave === '반차' ? 'half' : ''}`}>{leave}</span>}
                 <span className="team-count">{done}/{items.length}</span>
               </div>
@@ -180,7 +211,7 @@ const TeamView: React.FC = () => {
                 <ul className="team-items">
                   {items.map(i => (
                     <li key={i.id} className={i.completed ? 'done' : ''}>
-                      {i.completed ? <CheckCircle2 size={16} color="var(--primary)" /> : <Circle size={16} />}
+                      {i.completed ? <CheckCircle2 size={16} color="var(--secondary)" /> : <Circle size={16} />}
                       <span className="team-time">{String(i.time).padStart(2, '0')}:00</span>
                       <span>{i.task}</span>
                     </li>
@@ -205,7 +236,7 @@ const TeamView: React.FC = () => {
               <li key={a.email}>
                 <span>{displayId(a.email)}{a.is_admin && ' (관리자)'}</span>
                 {a.email.toLowerCase() !== myEmail && (
-                  <button onClick={() => handleRemove(a.email)} aria-label="삭제"><Trash2 size={14} /></button>
+                  <button onClick={() => handleRemove(a.email)} aria-label="삭제"><Trash2 size={16} /></button>
                 )}
               </li>
             ))}
@@ -223,61 +254,67 @@ const TeamStyle: React.FC = () => (
   <style>{`
     .team-view { display: flex; flex-direction: column; gap: 14px; }
     .team-card {
-      background: var(--card-bg, var(--bg-white));
-      border: 1px solid var(--card-border, var(--border));
-      border-radius: var(--radius-card, var(--radius-md));
-      box-shadow: var(--card-shadow, none);
+      background: var(--card-bg);
+      border: 3px solid var(--card-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--card-shadow);
       padding: 16px;
     }
     .team-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .team-summary-item {
-      background: var(--card-bg, var(--bg-white));
-      border: 1px solid var(--card-border, var(--border));
-      border-radius: 14px;
+      background: var(--card-bg);
+      border: 3px solid var(--card-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--pixel-shadow-sm);
       padding: 12px 8px;
       display: flex; flex-direction: column; align-items: center; gap: 2px;
     }
-    .team-summary-num { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
-    .team-summary-num.leave { color: #FF9500; }
-    .team-summary-label { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; }
+    .team-summary-num { font-family: var(--font-pixel); font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
+    .team-summary-num.leave { color: var(--warning); }
+    .team-summary-label { font-size: 0.75rem; color: var(--text-sub); font-weight: 700; }
     .team-leave-line { padding: 0 4px; }
     .team-card h3 { margin-bottom: 8px; }
     .team-muted { color: var(--text-sub); font-size: 0.9rem; }
     .team-error { color: var(--danger); font-size: 0.9rem; }
     .team-date-bar { display: flex; align-items: center; justify-content: space-between; }
     .team-date-bar > button {
-      color: var(--text-main); width: 40px; height: 40px; border-radius: 12px;
-      background: var(--surface-2, rgba(0,0,0,0.04)); display: flex; align-items: center; justify-content: center;
+      color: #181818; width: 42px; height: 42px; border-radius: var(--radius-sm);
+      border: 2px solid var(--card-border); box-shadow: var(--pixel-shadow-sm);
+      background: var(--accent-gold); display: flex; align-items: center; justify-content: center;
     }
-    .team-date-label { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+    .team-date-label { font-family: var(--font-pixel); display: flex; align-items: center; gap: 10px; font-size: 1.05rem; }
     .team-today-btn {
-      font-size: 0.8rem; color: var(--primary); padding: 4px 10px;
-      border-radius: 12px; background: rgba(0,122,255,0.1); font-weight: 600;
+      font-family: var(--font-pixel);
+      font-size: 0.8rem; color: #FFFFFF; padding: 6px 12px; min-height: 36px;
+      border-radius: var(--radius-sm); border: 2px solid var(--card-border);
+      box-shadow: var(--pixel-shadow-sm);
+      background: var(--secondary); font-weight: 700;
     }
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .team-member-card { border-top: 4px solid var(--member-color, var(--primary)); }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .team-member-card { border-top: 6px solid var(--member-color, var(--primary)); }
     .team-member-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .team-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--member-color, var(--primary)); }
-    .team-me { font-size: 0.75rem; color: var(--primary); font-weight: 700; }
-    .team-leave { font-size: 0.75rem; color: white; background: #FF9500; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
-    .team-leave.half { background: #5AC8FA; }
-    .team-count { margin-left: auto; font-size: 0.8rem; color: var(--text-sub); font-weight: 600; }
+    .team-dot { width: 10px; height: 10px; border-radius: 2px; background: var(--member-color, var(--primary)); }
+    .team-me { font-family: var(--font-pixel); font-size: 0.72rem; color: var(--primary); font-weight: 700; }
+    .team-leave { font-family: var(--font-pixel); font-size: 0.72rem; color: #181818; background: var(--warning); border: 1px solid #181818; padding: 2px 8px; border-radius: 3px; font-weight: 700; }
+    .team-leave.half { background: var(--accent-cyan); }
+    .team-count { margin-left: auto; font-family: var(--font-pixel); font-size: 0.8rem; color: var(--text-sub); font-weight: 700; }
     .team-items { display: flex; flex-direction: column; gap: 8px; }
     .team-items li { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: var(--text-main); }
     .team-items li.done span:last-child { text-decoration: line-through; color: var(--text-sub); }
-    .team-time { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-sub); }
+    .team-time { font-family: var(--font-pixel); font-size: 0.8rem; color: var(--text-sub); }
     .team-invite-form { display: flex; gap: 8px; margin: 12px 0; }
     .team-invite-form input {
-      flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--border);
-      border-radius: var(--radius-sm); background: transparent; color: var(--text-main); font-size: 16px;
+      flex: 1; min-width: 0; padding: 10px 12px; border: 2px solid var(--card-border);
+      border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-main); font-size: 16px;
     }
     .team-invite-form button {
-      display: flex; align-items: center; gap: 4px; padding: 0 14px;
-      background: var(--primary); color: white; border-radius: var(--radius-sm); font-weight: 600;
+      display: flex; align-items: center; gap: 4px; padding: 0 14px; min-height: 44px;
+      background: var(--accent-gold); color: #181818; border: 2px solid var(--card-border);
+      box-shadow: var(--pixel-shadow-sm); border-radius: var(--radius-sm); font-weight: 700;
     }
     .team-allowlist { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; }
-    .team-allowlist li { display: flex; justify-content: space-between; align-items: center; }
-    .team-allowlist button { color: var(--danger); padding: 4px; }
+    .team-allowlist li { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+    .team-allowlist button { color: var(--danger); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
     @media (max-width: 768px) {
       .team-grid { grid-template-columns: 1fr; }
     }

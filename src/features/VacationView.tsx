@@ -5,8 +5,8 @@ import { useUserStore } from '../store/useStore'
 import { localDateStr } from '../utils/dateUtils'
 
 const PRESET_COLORS = [
-  '#FF6B35', '#007AFF', '#34C759', '#FF9500', '#AF52DE',
-  '#FF2D55', '#5AC8FA', '#FFCC00', '#FF3B30', '#1A936F'
+  '#E52521', '#00A800', '#FBD000', '#24B8A8', '#AF52DE',
+  '#FF2D55', '#5C94FC', '#FF8A00', '#38E54D', '#C84C0C'
 ]
 
 const VacationView: React.FC = () => {
@@ -123,6 +123,18 @@ const VacationView: React.FC = () => {
       exit={{ opacity: 0, x: -20 }}
       className="view-container vacation-view"
     >
+      {/* 레트로 상단 배너 */}
+      <div className="retro-view-banner">
+        <div className="retro-view-banner-left">
+          <img src="./retro/runner.png" alt="" className="retro-sprite" style={{ width: '36px', height: '36px' }} />
+          <div>
+            <div className="retro-view-banner-title">1-UP REST STAGE · 연차 월드맵</div>
+            <div className="retro-view-banner-sub">나의 휴식 코인과 팀원 연차 일정을 한눈에 관리하세요</div>
+          </div>
+        </div>
+        <img src="./retro/star-block.png" alt="" className="retro-sprite" style={{ width: '28px', height: '28px' }} />
+      </div>
+
       {/* 나의 연차 카드 */}
       <section className="glass-card my-vacation-card">
         <div className="vac-summary-header">
@@ -249,7 +261,7 @@ const VacationView: React.FC = () => {
                         const dy = parseInt(parts[2])
                         return (
                           <div key={date + type} className="member-date-chip">
-                            <span className="mdc-badge" style={{ background: type === 'half' ? '#5AC8FA' : member.color }}>
+                            <span className="mdc-badge" style={{ background: type === 'half' ? 'var(--accent-cyan)' : member.color }}>
                               {mo}/{dy}
                             </span>
                             <span className="mdc-type">{type === 'half' ? '반차' : '연차'}</span>
@@ -270,9 +282,9 @@ const VacationView: React.FC = () => {
         <div className="vac-section-header">
           <h3>팀원 연차 캘린더</h3>
           <div className="calendar-nav">
-            <button onClick={prevMonth} className="cal-nav-btn"><ChevronLeft size={18} /></button>
+            <button onClick={prevMonth} className="cal-nav-btn" aria-label="이전 달"><ChevronLeft size={18} /></button>
             <span className="month-label">{year}년 {month + 1}월</span>
-            <button onClick={nextMonth} className="cal-nav-btn"><ChevronRight size={18} /></button>
+            <button onClick={nextMonth} className="cal-nav-btn" aria-label="다음 달"><ChevronRight size={18} /></button>
           </div>
         </div>
 
@@ -324,8 +336,8 @@ const VacationView: React.FC = () => {
                 <span className="date-detail-title">
                   {parseInt(selectedDate.split('-')[1])}월 {parseInt(selectedDate.split('-')[2])}일 연차 설정
                 </span>
-                <button className="close-detail-btn" onClick={() => setSelectedDate(null)}>
-                  <X size={16} />
+                <button className="close-detail-btn" onClick={() => setSelectedDate(null)} aria-label="닫기">
+                  <X size={18} />
                 </button>
               </div>
               {teamMembers.length === 0 ? (
@@ -384,7 +396,7 @@ const VacationView: React.FC = () => {
                 autoFocus
               />
               <button type="submit" className="form-save-btn">추가</button>
-              <button type="button" className="form-cancel-btn" onClick={() => setShowAddMember(false)}>
+              <button type="button" className="form-cancel-btn" onClick={() => setShowAddMember(false)} aria-label="취소">
                 <X size={16} />
               </button>
             </motion.form>
@@ -393,6 +405,7 @@ const VacationView: React.FC = () => {
 
         {monthVacationList.length === 0 ? (
           <div className="empty-vacation-list">
+            <img src="./retro/ghost.png" alt="" className="retro-sprite" style={{ width: '36px', height: '36px', marginBottom: '6px' }} />
             <p>이번 달 등록된 연차가 없습니다.</p>
             <p>달력에서 날짜를 클릭하여 연차를 추가하세요.</p>
           </div>
@@ -415,8 +428,9 @@ const VacationView: React.FC = () => {
                   className="event-remove-btn"
                   onClick={() => setTeamVacationType(dateStr, member.id, 'none')}
                   title="삭제"
+                  aria-label="삭제"
                 >
-                  <X size={14} />
+                  <X size={16} />
                 </button>
               </div>
             ))}
@@ -429,8 +443,8 @@ const VacationView: React.FC = () => {
               <div key={m.id} className="team-chip">
                 <span className="chip-dot" style={{ background: m.color }} />
                 <span>{m.name}</span>
-                <button className="chip-remove-btn" onClick={() => removeTeamMember(m.id)} title="팀원 삭제">
-                  <X size={10} strokeWidth={3} />
+                <button className="chip-remove-btn" onClick={() => removeTeamMember(m.id)} title="팀원 삭제" aria-label="팀원 삭제">
+                  <X size={12} strokeWidth={3} />
                 </button>
               </div>
             ))}
@@ -439,40 +453,48 @@ const VacationView: React.FC = () => {
       </section>
 
       <style>{`
-        .vacation-view { display: flex; flex-direction: column; gap: 20px; }
+        .vacation-view { display: flex; flex-direction: column; gap: 16px; }
 
         /* 나의 연차 */
-        .my-vacation-card { display: flex; flex-direction: column; gap: 16px; }
+        .my-vacation-card { display: flex; flex-direction: column; gap: 14px; }
         .vac-summary-header { display: flex; justify-content: space-between; align-items: center; }
-        .vac-edit-btn { color: var(--primary); font-weight: 600; font-size: 0.9rem; }
-        .vacation-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .vac-edit-btn {
+          font-family: var(--font-pixel);
+          color: #181818;
+          background: var(--accent-gold);
+          border: 2px solid var(--card-border);
+          box-shadow: var(--pixel-shadow-sm);
+          padding: 6px 12px;
+          min-height: 38px;
+          border-radius: var(--radius-sm);
+          font-weight: 700;
+          font-size: 0.85rem;
+        }
+        .vacation-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .stat-item {
-          background: rgba(0,0,0,0.03);
-          padding: 14px 16px;
-          border-radius: var(--radius-md);
+          background: var(--surface-2);
+          padding: 12px 10px;
+          border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border);
           display: flex; flex-direction: column; gap: 4px;
         }
         .stat-item.primary {
-          background: rgba(0,122,255,0.1);
-          border: 1px solid rgba(0,122,255,0.2);
+          background: var(--gold-soft);
         }
         .stat-item.primary .value { color: var(--primary); }
-        .stat-item .label { font-size: 0.8rem; color: var(--text-sub); }
-        .stat-item .value { font-size: 1.25rem; font-weight: 700; }
+        .stat-item .label { font-size: 0.78rem; color: var(--text-sub); font-weight: 600; }
+        .stat-item .value { font-size: 1.15rem; font-weight: 800; }
         .stat-input {
-          width: 100%; border: 1px solid var(--border); border-radius: 4px;
-          padding: 4px 8px; font-size: 1.1rem; font-weight: 700;
-          background: var(--bg-white); color: var(--text-main);
+          width: 100%; border: 2px solid var(--card-border); border-radius: 4px;
+          padding: 4px 8px; font-size: 16px; font-weight: 700;
+          background: var(--card-bg); color: var(--text-main);
         }
         .progress-bar-wrapper { display: flex; flex-direction: column; gap: 6px; }
         .progress-labels {
           display: flex; justify-content: space-between;
-          font-size: 0.82rem; color: var(--text-sub);
+          font-family: var(--font-pixel);
+          font-size: 0.8rem; color: var(--text-sub);
         }
-        .big-progress-bar {
-          height: 10px; background: var(--border); border-radius: 5px; overflow: hidden;
-        }
-        .big-progress { height: 100%; background: var(--primary); border-radius: 5px; }
 
         /* 팀원별 연차 현황 */
         .member-stats-card { display: flex; flex-direction: column; gap: 14px; }
@@ -483,75 +505,77 @@ const VacationView: React.FC = () => {
         .member-filter-row::-webkit-scrollbar { display: none; }
         .member-filter-chip {
           display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-          padding: 6px 14px; border-radius: 20px;
-          border: 1.5px solid var(--border); background: var(--bg-white);
-          font-size: 0.85rem; font-weight: 600; color: var(--text-sub);
-          cursor: pointer; transition: all 0.2s;
+          min-height: 40px;
+          padding: 6px 14px; border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border); background: var(--surface-2);
+          box-shadow: var(--pixel-shadow-sm);
+          font-size: 0.85rem; font-weight: 700; color: var(--text-main);
+          cursor: pointer;
         }
         .member-filter-chip.active {
-          border-color: var(--m-color, var(--primary));
-          background: color-mix(in srgb, var(--m-color, var(--primary)) 12%, transparent);
-          color: var(--text-main);
+          background: var(--gold-soft);
         }
-        .mfc-dot { width: 8px; height: 8px; border-radius: 50%; display: block; flex-shrink: 0; }
+        .mfc-dot { width: 8px; height: 8px; border-radius: 2px; display: block; flex-shrink: 0; }
         .member-detail-panel {
-          overflow: hidden; border-radius: var(--radius-md);
-          border: 1px solid var(--border); padding: 16px;
-          background: rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;
+          overflow: hidden; border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border); padding: 14px;
+          background: var(--surface-2); display: flex; flex-direction: column; gap: 12px;
         }
         .member-detail-header { display: flex; align-items: center; gap: 8px; }
-        .member-detail-dot { width: 10px; height: 10px; border-radius: 50%; display: block; flex-shrink: 0; }
-        .member-detail-name { font-weight: 700; font-size: 1rem; }
+        .member-detail-dot { width: 10px; height: 10px; border-radius: 2px; display: block; flex-shrink: 0; }
+        .member-detail-name { font-family: var(--font-pixel); font-weight: 700; font-size: 0.95rem; }
         .no-vac-text { font-size: 0.85rem; color: var(--text-sub); text-align: center; padding: 8px 0; }
         .member-date-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .member-date-chip {
           display: flex; align-items: center; gap: 6px;
           padding: 4px 10px 4px 4px;
-          background: rgba(0,0,0,0.04); border-radius: 20px;
+          background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius-sm);
         }
         .mdc-badge {
-          color: white; font-size: 0.75rem; font-weight: 700;
-          padding: 3px 8px; border-radius: 14px; white-space: nowrap;
+          color: #181818; font-family: var(--font-pixel); font-size: 0.75rem; font-weight: 700;
+          padding: 2px 8px; border-radius: 3px; border: 1px solid #181818; white-space: nowrap;
         }
-        .mdc-type { font-size: 0.78rem; font-weight: 600; color: var(--text-sub); }
+        .mdc-type { font-size: 0.78rem; font-weight: 700; color: var(--text-sub); }
 
         /* 캘린더 */
-        .team-calendar-card { display: flex; flex-direction: column; gap: 16px; }
-        .vac-section-header { display: flex; justify-content: space-between; align-items: center; }
-        .calendar-nav { display: flex; align-items: center; gap: 8px; }
-        .month-label { font-weight: 700; font-size: 0.95rem; min-width: 80px; text-align: center; }
+        .team-calendar-card { display: flex; flex-direction: column; gap: 14px; }
+        .vac-section-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .calendar-nav { display: flex; align-items: center; gap: 6px; }
+        .month-label { font-family: var(--font-pixel); font-weight: 700; font-size: 0.9rem; min-width: 82px; text-align: center; }
         .cal-nav-btn {
-          color: var(--text-sub); padding: 4px; border-radius: 4px;
-          display: flex; align-items: center; transition: all 0.2s;
+          color: #181818; background: var(--accent-gold);
+          border: 2px solid var(--card-border); box-shadow: var(--pixel-shadow-sm);
+          width: 38px; height: 38px; border-radius: var(--radius-sm);
+          display: flex; align-items: center; justify-content: center;
         }
-        .cal-nav-btn:hover { background: rgba(0,0,0,0.06); color: var(--text-main); }
         .team-calendar-grid {
           display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
         }
         .cal-day-name {
-          text-align: center; font-size: 0.7rem; font-weight: 600;
-          color: var(--text-sub); padding: 6px 0;
+          text-align: center; font-family: var(--font-pixel); font-size: 0.72rem; font-weight: 700;
+          color: var(--text-sub); padding: 4px 0;
         }
         .cal-cell {
-          min-height: 56px; display: flex; flex-direction: column;
-          align-items: center; padding: 5px 2px;
-          border-radius: 8px; cursor: pointer;
-          transition: all 0.2s; position: relative;
-          border: 2px solid transparent; gap: 3px;
+          min-height: 54px; display: flex; flex-direction: column;
+          align-items: center; padding: 4px 2px;
+          border-radius: var(--radius-sm); cursor: pointer;
+          position: relative;
+          border: 2px solid transparent; gap: 2px;
         }
         .cal-cell.empty { cursor: default; }
-        .cal-cell:not(.empty):hover { background: rgba(0,122,255,0.07); }
-        .cal-day-num { font-size: 0.82rem; font-weight: 500; line-height: 1; }
-        .cal-cell.is-today { background: rgba(0,122,255,0.06); }
-        .cal-cell.is-today .cal-day-num { color: var(--primary); font-weight: 700; }
-        .cal-cell.has-vacation { border-color: #FF9500 !important; background: rgba(255,149,0,0.04); }
+        .cal-cell:not(.empty):hover { background: var(--surface-2); border-color: var(--card-border); }
+        .cal-day-num { font-family: var(--font-pixel); font-size: 0.8rem; font-weight: 600; line-height: 1; }
+        .cal-cell.is-today { background: var(--surface-2); border: 2px dashed var(--primary); }
+        .cal-cell.is-today .cal-day-num { color: var(--primary); font-weight: 800; }
+        .cal-cell.has-vacation { border-color: var(--warning) !important; background: var(--gold-soft); }
         .cal-cell.is-selected {
-          background: var(--primary) !important;
-          border-color: var(--primary) !important;
+          background: var(--accent-gold) !important;
+          border-color: var(--card-border) !important;
+          box-shadow: var(--pixel-shadow-sm);
         }
-        .cal-cell.is-selected .cal-day-num { color: white; }
-        .cal-cell.is-selected .cal-member-name { color: rgba(255,255,255,0.9) !important; }
-        .cal-cell.is-selected .cal-member-more { color: rgba(255,255,255,0.7); }
+        .cal-cell.is-selected .cal-day-num { color: #181818; font-weight: 800; }
+        .cal-cell.is-selected .cal-member-name { color: #181818 !important; }
+        .cal-cell.is-selected .cal-member-more { color: #181818; }
         .cal-vacation-names {
           display: flex; flex-direction: column;
           align-items: center; gap: 1px; width: 100%;
@@ -564,115 +588,131 @@ const VacationView: React.FC = () => {
           padding: 0 2px;
         }
         .cal-member-more {
-          font-size: 0.58rem; color: var(--text-sub); font-weight: 600;
+          font-size: 0.58rem; color: var(--text-sub); font-weight: 700;
         }
 
         /* 날짜 상세 패널 */
         .date-detail {
-          overflow: hidden; background: rgba(255,149,0,0.04);
-          border-radius: var(--radius-md); border: 1px solid rgba(255,149,0,0.25);
-          padding: 14px 16px; margin-top: 4px;
+          overflow: hidden; background: var(--surface-2);
+          border-radius: var(--radius-sm); border: 2px solid var(--card-border);
+          padding: 14px; margin-top: 4px;
         }
         .date-detail-header {
-          display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+          display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
         }
-        .date-detail-title { font-weight: 700; color: #FF9500; font-size: 0.95rem; }
-        .close-detail-btn { color: var(--text-sub); display: flex; align-items: center; }
+        .date-detail-title { font-family: var(--font-pixel); font-weight: 700; color: var(--primary); font-size: 0.92rem; }
+        .close-detail-btn { color: var(--text-sub); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
         .member-toggle-list { display: flex; flex-wrap: wrap; gap: 8px; }
         .member-toggle-btn {
           display: flex; align-items: center; gap: 6px;
-          padding: 6px 14px; border-radius: 20px;
-          border: 1.5px solid var(--border); background: var(--bg-white);
-          font-size: 0.85rem; font-weight: 600; color: var(--text-sub);
-          transition: all 0.2s; cursor: pointer;
+          min-height: 40px;
+          padding: 6px 12px; border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border); background: var(--card-bg);
+          box-shadow: var(--pixel-shadow-sm);
+          font-size: 0.85rem; font-weight: 700; color: var(--text-main);
+          cursor: pointer;
         }
         .member-toggle-btn.active {
-          border-color: #FF9500; background: rgba(255,149,0,0.08); color: var(--text-main);
+          background: var(--gold-soft);
         }
         .member-toggle-dot {
-          width: 8px; height: 8px; border-radius: 50%;
+          width: 8px; height: 8px; border-radius: 2px;
           background: var(--m-color, var(--border)); display: block;
         }
         .vacation-badge {
-          font-size: 0.7rem; background: #FF9500; color: white;
-          padding: 1px 6px; border-radius: 8px; margin-left: 2px;
+          font-family: var(--font-pixel);
+          font-size: 0.68rem; background: var(--warning); color: #181818;
+          border: 1px solid #181818;
+          padding: 1px 6px; border-radius: 3px; margin-left: 2px;
         }
-        .half-badge { background: #5AC8FA; }
+        .half-badge { background: var(--accent-cyan); }
         .member-toggle-btn.half-day {
-          border-color: #5AC8FA !important; background: rgba(90, 200, 250, 0.08) !important;
+          background: var(--cyan-soft) !important;
         }
         .vac-type-hint {
-          font-size: 0.75rem; color: var(--text-sub); margin-bottom: 4px;
+          font-size: 0.75rem; color: var(--text-sub); margin-bottom: 6px;
         }
-        .cal-half-name { opacity: 0.75; }
+        .cal-half-name { opacity: 0.85; }
         .no-members-text { font-size: 0.85rem; color: var(--text-sub); }
 
         /* 연차 목록 */
-        .vacation-list-card { display: flex; flex-direction: column; gap: 16px; }
+        .vacation-list-card { display: flex; flex-direction: column; gap: 14px; }
         .add-member-btn {
           display: flex; align-items: center; gap: 6px;
-          background: var(--primary); color: white;
-          padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+          min-height: 40px;
+          font-family: var(--font-pixel);
+          background: var(--accent-gold); color: #181818;
+          border: 2px solid var(--card-border); box-shadow: var(--pixel-shadow-sm);
+          padding: 6px 12px; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 700;
         }
         .add-member-form {
           display: flex; gap: 8px; overflow: hidden; padding-bottom: 4px;
         }
         .add-member-form input {
-          flex: 1; padding: 8px 12px; border-radius: var(--radius-sm);
-          border: 1px solid var(--border); background: var(--bg-white); color: var(--text-main);
+          flex: 1; min-width: 0; padding: 8px 12px; border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border); background: var(--surface-2); color: var(--text-main);
+          font-size: 16px;
         }
         .form-save-btn {
-          background: var(--primary); color: white; padding: 0 16px;
-          border-radius: var(--radius-sm); font-weight: 600;
+          background: var(--secondary); color: white; padding: 0 14px; min-height: 42px;
+          border: 2px solid var(--card-border); box-shadow: var(--pixel-shadow-sm);
+          border-radius: var(--radius-sm); font-weight: 700;
         }
-        .form-cancel-btn { color: var(--text-sub); padding: 8px; display: flex; align-items: center; }
+        .form-cancel-btn { color: var(--text-sub); width: 40px; height: 42px; display: flex; align-items: center; justify-content: center; }
         .empty-vacation-list {
           text-align: center; color: var(--text-sub); font-size: 0.88rem;
-          padding: 32px 0; border: 1px dashed var(--border);
-          border-radius: var(--radius-md); line-height: 2.2;
+          padding: 28px 12px; border: 2px dashed var(--border-soft);
+          border-radius: var(--radius-sm); line-height: 1.8;
         }
         .vacation-event-list { display: flex; flex-direction: column; gap: 8px; }
         .vacation-event-item {
-          display: flex; align-items: center; gap: 12px; padding: 10px 14px;
-          background: rgba(255,149,0,0.05); border: 1px solid rgba(255,149,0,0.18);
-          border-radius: var(--radius-md);
+          display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+          background: var(--surface-2); border: 2px solid var(--card-border);
+          box-shadow: var(--pixel-shadow-sm);
+          border-radius: var(--radius-sm);
         }
         .event-date-badge {
           display: flex; flex-direction: column; align-items: center;
-          min-width: 44px; background: #FF9500; color: white;
-          border-radius: 8px; padding: 4px 6px;
+          min-width: 46px; background: var(--warning); color: #181818;
+          border: 2px solid #181818;
+          border-radius: var(--radius-sm); padding: 4px 6px;
+          font-family: var(--font-pixel);
         }
-        .event-month { font-size: 0.65rem; font-weight: 600; opacity: 0.85; }
-        .event-day { font-size: 1rem; font-weight: 800; line-height: 1.2; }
-        .event-member-info { display: flex; align-items: center; gap: 8px; flex: 1; }
-        .event-dot { width: 10px; height: 10px; border-radius: 50%; display: block; flex-shrink: 0; }
+        .event-month { font-size: 0.65rem; font-weight: 700; }
+        .event-day { font-size: 0.95rem; font-weight: 800; line-height: 1.2; }
+        .event-member-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+        .event-dot { width: 10px; height: 10px; border-radius: 2px; display: block; flex-shrink: 0; }
         .event-name { font-weight: 700; font-size: 0.95rem; }
         .event-tag {
-          font-size: 0.75rem; color: var(--text-sub);
-          background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 8px;
+          font-family: var(--font-pixel);
+          font-size: 0.72rem; color: var(--text-main);
+          background: var(--card-bg); border: 1.5px solid var(--card-border);
+          padding: 2px 8px; border-radius: 3px;
         }
-        .event-half-tag { background: rgba(90, 200, 250, 0.15); color: #5AC8FA; }
-        .half-date-badge { background: #5AC8FA !important; }
+        .event-half-tag { background: var(--cyan-soft); }
+        .half-date-badge { background: var(--accent-cyan) !important; }
         .event-remove-btn {
-          color: var(--text-sub); padding: 4px; display: flex;
-          align-items: center; transition: color 0.2s;
+          color: var(--text-sub); width: 38px; height: 38px; display: flex;
+          align-items: center; justify-content: center;
         }
         .event-remove-btn:hover { color: var(--danger); }
 
         /* 팀원 칩 */
         .team-chip-list {
           display: flex; flex-wrap: wrap; gap: 8px;
-          padding-top: 12px; border-top: 1px dashed var(--border);
+          padding-top: 12px; border-top: 2px dashed var(--border-soft);
         }
         .team-chip {
           display: flex; align-items: center; gap: 6px;
-          padding: 4px 10px; background: rgba(0,0,0,0.03);
-          border-radius: 16px; font-size: 0.82rem; font-weight: 600; color: var(--text-sub);
+          min-height: 36px;
+          padding: 4px 10px; background: var(--surface-2);
+          border: 2px solid var(--card-border);
+          border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 700; color: var(--text-main);
         }
-        .chip-dot { width: 8px; height: 8px; border-radius: 50%; display: block; }
+        .chip-dot { width: 8px; height: 8px; border-radius: 2px; display: block; }
         .chip-remove-btn {
-          color: var(--text-sub); display: flex; align-items: center;
-          margin-left: 2px; opacity: 0.6; transition: opacity 0.2s;
+          color: var(--text-sub); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+          margin-left: 2px; opacity: 0.85;
         }
         .chip-remove-btn:hover { opacity: 1; color: var(--danger); }
       `}</style>

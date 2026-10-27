@@ -53,9 +53,21 @@ const SettingsView: React.FC = () => {
       exit={{ opacity: 0, x: -20 }}
       className="view-container"
     >
-      <div style={{ marginBottom: '20px' }}><AuthPanel /></div>
+      <div className="retro-view-banner">
+        <div className="retro-view-banner-left">
+          <img src="./retro/ghost.png" alt="" className="retro-sprite" style={{ width: '34px', height: '34px' }} />
+          <div>
+            <div className="retro-view-banner-title">OPTIONS &amp; SAVE DATA · 설정</div>
+            <div className="retro-view-banner-sub">플레이어 정보 및 세이브 데이터를 관리하세요</div>
+          </div>
+        </div>
+        <img src="./retro/star-block.png" alt="" className="retro-sprite" style={{ width: '28px', height: '28px' }} />
+      </div>
+
+      <div><AuthPanel /></div>
+
       <section className="glass-card settings-card">
-        <h3>사용자 설정</h3>
+        <h3>🎮 플레이어 설정</h3>
         <div className="settings-form">
           <div className="setting-group">
             <label>이름</label>
@@ -81,7 +93,7 @@ const SettingsView: React.FC = () => {
       </section>
 
       <section className="glass-card backup-card">
-        <h3>데이터 백업 / 복원</h3>
+        <h3>💾 세이브 데이터 백업 / 복원</h3>
         <p className="backup-desc">일정, 메모, 설정 등 모든 데이터를 JSON 파일로 저장하거나 불러올 수 있습니다.</p>
         <div className="backup-actions">
           <button className="backup-btn export-btn" onClick={handleExport}>
@@ -104,66 +116,72 @@ const SettingsView: React.FC = () => {
         {importStatus === 'error' && (
           <div className="status-box error-box">올바른 백업 파일이 아닙니다. 다시 확인해주세요.</div>
         )}
-        <div className="warning-box" style={{ marginTop: '16px' }}>
+        <div className="warning-box" style={{ marginTop: '12px' }}>
           * 캐시 삭제 전 반드시 백업 파일을 내보내두세요. 불러오기 시 기존 데이터는 덮어씌워집니다.
         </div>
       </section>
 
       <section className="glass-card info-card">
-        <h3>시스템 정보</h3>
-        <p>버전: 1.0.0 (Local-Only)</p>
-        <p>저장 방식: Browser LocalStorage</p>
+        <h3>🕹️ 시스템 정보</h3>
+        <p>버전: 1.0.0 (Retro Arcade Edition)</p>
+        <p>저장 방식: Browser LocalStorage + Cloud Sync</p>
       </section>
 
       <style>{`
         .settings-card {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 16px;
         }
         .settings-form {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
         .setting-group {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
         .setting-group label {
-          font-weight: 600;
-          font-size: 0.9rem;
+          font-family: var(--font-pixel);
+          font-weight: 700;
+          font-size: 0.88rem;
           color: var(--text-sub);
         }
         .setting-group input {
-          padding: 12px;
+          padding: 10px 12px;
+          min-height: 44px;
           border-radius: var(--radius-sm);
-          border: 1px solid var(--border);
-          background: var(--bg-white);
+          border: 2px solid var(--card-border);
+          background: var(--surface-2);
           color: var(--text-main);
-          font-size: 1rem;
+          font-size: 16px;
         }
         .calc-btn {
-          background: var(--primary);
-          color: white;
+          font-family: var(--font-pixel);
+          background: var(--accent-gold);
+          color: #181818;
+          border: 2px solid var(--card-border);
+          box-shadow: var(--pixel-shadow-sm);
           padding: 12px;
+          min-height: 44px;
           border-radius: var(--radius-sm);
-          font-weight: 600;
-          margin-top: 8px;
+          font-weight: 700;
+          margin-top: 4px;
         }
         .info-card {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
           color: var(--text-sub);
           font-size: 0.9rem;
         }
         .warning-box {
-          margin-top: 8px;
           padding: 12px;
-          background: rgba(255, 149, 0, 0.1);
-          color: var(--warning);
+          background: var(--gold-soft);
+          border: 2px solid var(--warning);
+          color: var(--text-main);
           border-radius: var(--radius-sm);
           font-size: 0.8rem;
           line-height: 1.4;
@@ -171,7 +189,7 @@ const SettingsView: React.FC = () => {
         .backup-card {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
         .backup-desc {
           font-size: 0.9rem;
@@ -179,46 +197,43 @@ const SettingsView: React.FC = () => {
         }
         .backup-actions {
           display: flex;
-          gap: 12px;
+          gap: 10px;
           flex-wrap: wrap;
         }
         .backup-btn {
           flex: 1;
-          min-width: 160px;
-          padding: 14px 20px;
+          min-width: 140px;
+          min-height: 44px;
+          padding: 12px 16px;
           border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border);
+          box-shadow: var(--pixel-shadow-sm);
+          font-family: var(--font-pixel);
           font-weight: 700;
-          font-size: 0.95rem;
+          font-size: 0.88rem;
           cursor: pointer;
-          transition: all 0.2s;
         }
         .export-btn {
           background: var(--primary);
-          color: white;
-        }
-        .export-btn:hover {
-          opacity: 0.85;
+          color: var(--btn-primary-text);
         }
         .import-btn {
-          background: rgba(0, 122, 255, 0.1);
-          color: var(--primary);
-          border: 1px solid var(--primary);
-        }
-        .import-btn:hover {
-          background: rgba(0, 122, 255, 0.2);
+          background: var(--surface-2);
+          color: var(--text-main);
         }
         .status-box {
           padding: 12px;
           border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border);
           font-size: 0.9rem;
-          font-weight: 600;
+          font-weight: 700;
         }
         .success-box {
-          background: rgba(52, 199, 89, 0.15);
-          color: #34C759;
+          background: var(--emerald-soft);
+          color: var(--success);
         }
         .error-box {
-          background: rgba(255, 59, 48, 0.1);
+          background: var(--primary-soft);
           color: var(--danger);
         }
       `}</style>

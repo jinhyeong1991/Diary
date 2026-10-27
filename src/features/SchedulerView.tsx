@@ -47,12 +47,23 @@ const SchedulerView: React.FC = () => {
       exit={{ opacity: 0, x: -20 }}
       className="view-container"
     >
+      <div className="retro-view-banner">
+        <div className="retro-view-banner-left">
+          <img src="./retro/robot.png" alt="" className="retro-sprite" style={{ width: '36px', height: '36px' }} />
+          <div>
+            <div className="retro-view-banner-title">DAILY QUEST LOG · 시간별 일정</div>
+            <div className="retro-view-banner-sub">오늘의 퀘스트를 클리어하고 경험치(XP)를 채우세요!</div>
+          </div>
+        </div>
+        <img src="./retro/slime.png" alt="" className="retro-sprite" style={{ width: '30px', height: '30px' }} />
+      </div>
+
       <section className="glass-card scheduler-header">
         <DayNav date={selectedDate} onChange={setSelectedDate} />
         <div className="sched-summary">
           <div className="sched-summary-text">
-            <strong>{totalCount === 0 ? '등록된 일정 없음' : `${completedCount} / ${totalCount} 완료`}</strong>
-            <span>{totalCount === 0 ? '아래에서 시간과 할 일을 추가하세요' : progress === 100 ? '오늘 할 일을 모두 끝냈어요 🎉' : `남은 일 ${totalCount - completedCount}개`}</span>
+            <strong>{totalCount === 0 ? '등록된 퀘스트 없음' : `${completedCount} / ${totalCount} 퀘스트 완료`}</strong>
+            <span>{totalCount === 0 ? '아래에서 시간과 할 일을 추가하세요' : progress === 100 ? 'STAGE CLEAR! 오늘 할 일을 모두 끝냈어요 🎉' : `남은 퀘스트 ${totalCount - completedCount}개`}</span>
             <div className="sched-bar"><div style={{ width: `${progress}%` }} /></div>
           </div>
           <span className="pill">{progress.toFixed(0)}%</span>
@@ -86,6 +97,7 @@ const SchedulerView: React.FC = () => {
       <section className="timeline-section">
         {sortedSchedules.length === 0 ? (
           <div className="glass-card empty-timeline">
+            <img src="./retro/star-block.png" alt="" className="retro-sprite" style={{ width: '40px', height: '40px', marginBottom: '8px' }} />
             <p>이 날 등록된 일정이 없습니다.<br />위 입력칸에 할 일을 적고 + 를 눌러 추가하세요.</p>
           </div>
         ) : (
@@ -101,7 +113,7 @@ const SchedulerView: React.FC = () => {
                 <div className="time-label">{item.time.toString().padStart(2, '0')}:00</div>
                 <div className="item-content glass-card" onClick={() => toggleSchedule(selectedDate, item.id)}>
                   <div className="check-icon">
-                    {item.completed ? <CheckCircle2 size={22} color="var(--primary)" /> : <Circle size={22} />}
+                    {item.completed ? <CheckCircle2 size={22} color="var(--secondary)" /> : <Circle size={22} />}
                   </div>
                   <span className="task-text">{item.task}</span>
                   <button
@@ -125,131 +137,81 @@ const SchedulerView: React.FC = () => {
           align-items: center;
           gap: 12px;
         }
-        .date-picker-container {
-          flex: 1;
-        }
-        .schedule-date-input {
-          padding: 8px 12px;
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--border);
-          background: var(--bg-white);
-          color: var(--text-main);
-          font-size: 1.1rem;
-          font-weight: 600;
-        }
-        .progress-info {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-        .circular-progress-container {
-          position: relative;
-          width: 80px;
-          height: 80px;
-        }
-        .circular-progress {
-          transform: rotate(-90deg);
-        }
-        .bg-circle {
-          fill: none;
-          stroke: var(--border);
-          stroke-width: 6;
-        }
-        .progress-circle {
-          fill: none;
-          stroke: var(--primary);
-          stroke-width: 6;
-          stroke-linecap: round;
-        }
-        .circular-text {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        .circular-text .percent {
-          font-size: 1.1rem;
-          font-weight: 800;
-          color: var(--text-main);
-        }
         .add-schedule-card {
-          padding: 12px 16px;
+          padding: 12px 14px;
         }
         .schedule-form .input-row {
           display: flex;
-          gap: 12px;
+          gap: 8px;
           align-items: center;
         }
         .time-select {
           display: flex;
           align-items: center;
           gap: 6px;
-          color: var(--text-sub);
-          background: rgba(0, 0, 0, 0.03);
-          padding: 8px 12px;
+          color: var(--text-main);
+          background: var(--surface-2);
+          padding: 0 10px;
+          height: 44px;
           border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border);
         }
         .time-select select {
           border: none;
           background: transparent;
-          font-weight: 600;
-          font-family: inherit;
+          font-family: var(--font-pixel);
+          font-weight: 700;
           color: var(--text-main);
           outline: none;
         }
         .task-input {
           flex: 1;
-          border: none;
-          background: transparent;
-          font-size: 1rem;
-          padding: 8px 0;
+          min-width: 0;
+          height: 44px;
+          border: 2px solid var(--card-border);
+          background: var(--surface-2);
+          font-size: 16px;
+          padding: 0 12px;
+          border-radius: var(--radius-sm);
           outline: none;
           color: var(--text-main);
         }
         .add-btn {
-          background: var(--primary);
-          color: white;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
+          background: var(--accent-gold);
+          color: #181818;
+          width: 44px;
+          height: 44px;
+          border-radius: var(--radius-sm);
+          border: 2px solid var(--card-border);
+          box-shadow: var(--pixel-shadow-sm);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
         .timeline-list {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 10px;
         }
         .timeline-item {
           display: flex;
-          gap: 16px;
-          align-items: flex-start;
+          gap: 10px;
+          align-items: center;
         }
         .time-label {
-          min-width: 50px;
+          min-width: 48px;
+          font-family: var(--font-pixel);
           font-weight: 700;
           font-size: 0.85rem;
-          color: var(--text-sub);
-          padding-top: 20px;
+          color: var(--text-main);
         }
         .item-content {
           flex: 1;
           display: flex;
           align-items: center;
-          gap: 16px;
-          padding: 16px 20px;
+          gap: 12px;
+          padding: 12px 14px;
           cursor: pointer;
-          transition: transform 0.2s;
-        }
-        .item-content:hover {
-          transform: translateX(4px);
         }
         .timeline-item.completed .task-text {
           text-decoration: line-through;
@@ -257,28 +219,31 @@ const SchedulerView: React.FC = () => {
         }
         .task-text {
           flex: 1;
-          font-weight: 500;
+          font-weight: 600;
+          min-width: 0;
+          overflow-wrap: anywhere;
         }
         .check-icon {
           display: flex;
           align-items: center;
           color: var(--text-sub);
+          flex-shrink: 0;
         }
         .delete-item-btn {
           color: var(--text-sub);
-          opacity: 0;
-          transition: opacity 0.2s;
-          padding: 4px;
-        }
-        .item-content:hover .delete-item-btn {
-          opacity: 1;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
         }
         .delete-item-btn:hover {
           color: var(--danger);
         }
         .empty-timeline {
           text-align: center;
-          padding: 40px;
+          padding: 32px 16px;
           color: var(--text-sub);
         }
       `}</style>

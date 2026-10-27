@@ -1,38 +1,81 @@
-:root {
-  /* Color Palette */
-  --primary: #007AFF;
-  --primary-hover: #0056B3;
-  --bg-light: #F5F7FA;
-  --bg-white: #FFFFFF;
-  --text-main: #1D1D1F;
-  --text-sub: #86868B;
-  --border: #E5E5E5;
-  --success: #34C759;
-  --warning: #FF9500;
-  --danger: #FF3B30;
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+@font-face {
+  font-family: 'DungGeunMo';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Retro Overworld Day Palette (픽셀 게임 낮 팔레트) */
+  --primary: #E52521;          /* 레트로 레드 */
+  --primary-hover: #B81A17;
+  --secondary: #00A800;        /* 파이프 그린 */
+  --accent-gold: #FBD000;      /* Question Block Coin Gold */
+  --accent-sky: #5C94FC;       /* Classic 8-bit Overworld Sky Blue */
+  --accent-brick: #C84C0C;     /* Classic Brick Block Terracotta */
+  --accent-cyan: #24B8A8;      /* 다이아 시안 */
+
+  --bg-light: #CFE4FF;         /* Soft Overworld Sky Tint */
+  --bg-white: #FFFDF7;         /* Warm Retro Block Cream */
+  --text-main: #181818;        /* Crisp 8-bit Black */
+  --text-sub: #5A4E40;         /* Earthy Pixel Brown-Gray */
+  --border: #181818;           /* Bold Pixel Outline */
+  --border-soft: #D6C9B3;
+
+  --success: #00A800;          /* 1-UP Green */
+  --warning: #FF8A00;          /* Fire Flower Orange */
+  --danger: #E52521;           /* 용암 레드 */
+
+  /* Retro Block & HUD Surfaces */
+  --glass-bg: rgba(255, 253, 247, 0.95);
+  --glass-border: #181818;
+  --glass-shadow: 4px 4px 0px #181818;
+  --pixel-shadow: 4px 4px 0px #181818;
+  --pixel-shadow-sm: 2px 2px 0px #181818;
+  --pixel-highlight: inset 2px 2px 0px rgba(255, 255, 255, 0.85), inset -2px -2px 0px rgba(0, 0, 0, 0.08);
 
   /* Spacing & Sizing */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --header-height: 60px;
-  --nav-height: 70px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --header-height: 62px;
+  --nav-height: 72px;
+
+  /* Fonts */
+  --font-pixel: 'DungGeunMo', 'Press Start 2P', 'Pretendard', monospace;
+  --font-body: 'DungGeunMo', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 [data-theme='dark'] {
-  --bg-light: #000000;
-  --bg-white: #1C1C1E;
-  --text-main: #F5F5F7;
-  --text-sub: #A1A1A6;
-  --border: #38383A;
-  
-  --glass-bg: rgba(28, 28, 30, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  /* Retro Underground / Night World Palette */
+  --primary: #FBD000;          /* Glowing Coin Gold */
+  --primary-hover: #E0B800;
+  --secondary: #38E54D;        /* 형광 그린 */
+  --accent-gold: #FBD000;
+  --accent-sky: #1B2448;
+  --accent-brick: #008088;     /* Underground Blue-Teal Brick */
+  --accent-cyan: #4AEDD9;      /* Diamond Glow */
+
+  --bg-light: #0F1226;         /* Deep Arcade Night */
+  --bg-white: #1B203E;         /* Underground Brick Navy */
+  --text-main: #F8F9FA;        /* Crisp Arcade White */
+  --text-sub: #A5B4D4;         /* Muted Starlight Blue */
+  --border: #050711;           /* Deep Pixel Outline */
+  --border-soft: #323B6B;
+
+  --success: #38E54D;
+  --warning: #FFB020;
+  --danger: #FF5252;
+
+  --glass-bg: rgba(27, 32, 62, 0.96);
+  --glass-border: #4AEDD9;
+  --glass-shadow: 4px 4px 0px #050711;
+  --pixel-shadow: 4px 4px 0px #050711;
+  --pixel-shadow-sm: 2px 2px 0px #050711;
+  --pixel-highlight: inset 2px 2px 0px rgba(255, 255, 255, 0.12), inset -2px -2px 0px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -44,11 +87,21 @@
 }
 
 body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-body);
   background-color: var(--bg-light);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
   color: var(--text-main);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
   overflow-x: hidden;
+}
+
+[data-theme='dark'] body {
+  background-image:
+    linear-gradient(rgba(74, 237, 217, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 237, 217, 0.05) 1px, transparent 1px);
 }
 
 button {
@@ -65,4 +118,11 @@ ul {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+img.retro-sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  user-select: none;
+  -webkit-user-drag: none;
 }

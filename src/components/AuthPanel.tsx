@@ -59,7 +59,7 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
     return (
       <section className="auth-card">
         <div className="auth-row">
-          <Cloud size={18} color="var(--primary)" />
+          <img src="./retro/star-block.png" alt="" className="retro-sprite" style={{ width: '22px', height: '22px' }} />
           <span className="auth-email">{displayId(session.user.email)}</span>
           <button className="auth-ghost" onClick={() => signOut()}><LogOut size={14} /> 로그아웃</button>
         </div>
@@ -73,7 +73,10 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
 
   return (
     <section className="auth-card">
-      <h3><Cloud size={18} color="var(--primary)" /> 로그인하고 PC·모바일 동기화</h3>
+      <h3>
+        <img src="./retro/star-block.png" alt="" className="retro-sprite" style={{ width: '22px', height: '22px' }} />
+        <Cloud size={18} color="var(--primary)" /> 로그인하고 PC·모바일 동기화
+      </h3>
       <p className="auth-desc">로그인하면 일정·메모·연차가 모든 기기에 실시간으로 맞춰지고, 팀 일정을 볼 수 있습니다.</p>
       <div className="auth-tabs" role="tablist">
         <button type="button" role="tab" aria-selected={mode === 'login'} className={mode === 'login' ? 'on' : ''} onClick={() => switchMode('login')}>로그인</button>
@@ -98,35 +101,55 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
 const AuthStyle: React.FC = () => (
   <style>{`
     .auth-card {
-      background: var(--card-bg, var(--bg-white));
-      border: 1px solid var(--card-border, var(--border));
-      border-radius: var(--radius-card, var(--radius-md));
-      box-shadow: var(--card-shadow, none);
+      background: var(--card-bg);
+      border: 3px solid var(--card-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--card-shadow);
       padding: 16px;
     }
     .auth-card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .auth-desc { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 10px; line-height: 1.5; }
+    .auth-desc { color: var(--text-sub); font-size: 0.88rem; margin-bottom: 10px; line-height: 1.5; }
     .auth-form { display: flex; gap: 8px; margin-bottom: 10px; }
     .auth-form input {
-      flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--border);
-      border-radius: var(--radius-sm); background: transparent; color: var(--text-main);
-      font-size: 16px; /* iOS 확대 방지 */
+      flex: 1; min-width: 0; padding: 10px 12px; min-height: 44px;
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-main);
+      font-size: 16px;
     }
     .auth-form button {
       display: flex; align-items: center; gap: 6px; padding: 0 14px; white-space: nowrap;
-      background: var(--primary); color: white; border-radius: var(--radius-sm); font-weight: 600;
+      font-family: var(--font-pixel);
+      background: var(--accent-gold); color: #181818;
+      border: 2px solid var(--card-border); box-shadow: var(--pixel-shadow-sm);
+      border-radius: var(--radius-sm); font-weight: 700;
     }
     .auth-form button:disabled { opacity: 0.6; }
     .auth-form-col { flex-direction: column; }
     .auth-form-col input { flex: none; }
     .auth-form .auth-submit { justify-content: center; height: 44px; }
-    .auth-tabs { display: flex; background: rgba(0,0,0,0.05); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 10px; }
-    .auth-tabs button { flex: 1; height: 36px; border-radius: 6px; color: var(--text-sub); font-weight: 600; font-size: 0.92rem; }
-    .auth-tabs button.on { background: var(--bg-white); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+    .auth-tabs {
+      display: flex; gap: 6px; background: var(--surface-2);
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-sm); padding: 4px; margin-bottom: 10px;
+    }
+    .auth-tabs button {
+      flex: 1; height: 38px; border-radius: var(--radius-sm);
+      font-family: var(--font-pixel);
+      color: var(--text-sub); font-weight: 700; font-size: 0.88rem;
+    }
+    .auth-tabs button.on {
+      background: var(--accent-gold); color: #181818;
+      border: 2px solid var(--card-border); box-shadow: var(--pixel-shadow-sm);
+    }
     .auth-row { display: flex; align-items: center; gap: 8px; }
-    .auth-email { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .auth-ghost { margin-left: auto; display: flex; align-items: center; gap: 4px; color: var(--text-sub); font-size: 0.85rem; white-space: nowrap; }
-    .auth-status { margin-top: 8px; font-size: 0.85rem; color: var(--success); }
+    .auth-email { font-family: var(--font-pixel); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .auth-ghost {
+      margin-left: auto; display: flex; align-items: center; gap: 4px;
+      min-height: 36px; padding: 4px 10px;
+      background: var(--surface-2); border: 2px solid var(--card-border); border-radius: var(--radius-sm);
+      color: var(--text-main); font-size: 0.82rem; font-weight: 700; white-space: nowrap;
+    }
+    .auth-status { margin-top: 8px; font-size: 0.85rem; font-weight: 700; color: var(--success); }
     .auth-status.bad { color: var(--danger); }
   `}</style>
 )
