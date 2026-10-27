@@ -32,6 +32,7 @@ import VacationView from './features/VacationView'
 import SchedulerView from './features/SchedulerView'
 import SettingsView from './features/SettingsView'
 import TeamView from './features/TeamView'
+import DayNav from './components/DayNav'
 import { initCloudSync, useCloudStore } from './sync/cloudSync'
 import { isCloudEnabled } from './lib/supabase'
 import { getHolidayName, isKoreanHoliday } from './utils/koreanHolidays'
@@ -1700,39 +1701,58 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({ selectedDate, onDateSelect 
 const MemoView: React.FC = () => {
   const { memos, setMemo, ideaMemos, setIdeaMemo } = useMemoStore()
   const today = useTodayDate()
-  const content = memos[today] || ''
-  const ideaContent = ideaMemos[today] || ''
-  
+  const [date, setDate] = useState(today)
+  const cloudStatus = useCloudStore(s => s.status)
+  const content = memos[date] || ''
+  const ideaContent = ideaMemos[date] || ''
+
+  // 자정이 지나면 오늘로 이동
+  const prevTodayRef = useRef(today)
+  useEffect(() => {
+    if (prevTodayRef.current !== today) { prevTodayRef.current = today; setDate(today) }
+  }, [today])
+
+  const saveLabel = cloudStatus === 'synced' ? '☁️ 자동 저장 · 기기 간 동기화됨'
+    : cloudStatus === 'syncing' ? '⏳ 동기화 중...'
+    : '💾 이 기기에 자동 저장'
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       className="view-container memo-view-container"
     >
-      <div className="glass-card memo-card">
-        <h3>📝 주요 메모 ({today})</h3>
-        <textarea 
-          value={content}
-          onChange={(e) => setMemo(today, e.target.value)}
-          placeholder="여기에 자유롭게 주요 업무나 일정을 메모하세요. 자동으로 날짜별 저장됩니다."
-          className="memo-textarea"
-        />
+      <div className="glass-card">
+        <DayNav date={date} onChange={setDate} />
       </div>
 
-      <div className="glass-card memo-card" style={{ marginTop: '20px' }}>
-        <h3>💡 아이디어 메모 (기타)</h3>
-        <textarea 
-          value={ideaContent}
-          onChange={(e) => setIdeaMemo(today, e.target.value)}
-          placeholder="오늘 떠오른 아이디어나 메모를 적어주세요. 내일이 되면 새로운 메모장으로 시작합니다."
+      <div className="glass-card memo-card">
+        <h3>📝 주요 메모</h3>
+        <textarea
+          value={content}
+          onChange={(e) => setMemo(date, e.target.value)}
+          placeholder="이 날의 주요 업무나 일정을 메모하세요."
           className="memo-textarea"
         />
+        <div className="memo-meta"><span>{saveLabel}</span><span>{content.length}자</span></div>
+      </div>
+
+      <div className="glass-card memo-card">
+        <h3>💡 아이디어 메모</h3>
+        <textarea
+          value={ideaContent}
+          onChange={(e) => setIdeaMemo(date, e.target.value)}
+          placeholder="떠오른 아이디어나 기타 내용을 적어 두세요."
+          className="memo-textarea"
+        />
+        <div className="memo-meta"><span>날짜별로 따로 저장됩니다</span><span>{ideaContent.length}자</span></div>
       </div>
       <style>{`
         .memo-view-container {
           display: flex;
           flex-direction: column;
+          gap: 14px;
         }
         .memo-card {
           display: flex;

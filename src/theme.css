@@ -1,0 +1,422 @@
+/*
+ * 공통 디자인 시스템 (모바일 우선)
+ * 각 화면 컴포넌트 안의 <style> 보다 우선하도록 .app-container 로 범위를 지정함
+ */
+
+:root {
+  --fs-xs: 0.75rem;   /* 12px 보조 라벨 */
+  --fs-sm: 0.8125rem; /* 13px 설명 */
+  --fs-base: 0.9375rem; /* 15px 본문 */
+  --fs-md: 1rem;      /* 16px 카드 제목 */
+  --fs-lg: 1.125rem;  /* 18px 섹션 제목 */
+  --fs-xl: 1.375rem;  /* 22px 큰 숫자 */
+
+  --card-bg: #FFFFFF;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.05);
+  --surface-2: #F2F4F7;
+  --primary-soft: rgba(0, 122, 255, 0.1);
+  --radius-card: 18px;
+  --gap: 14px;
+}
+
+[data-theme='dark'] {
+  --card-bg: #1C1C1E;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: none;
+  --surface-2: #2C2C2E;
+  --primary-soft: rgba(10, 132, 255, 0.18);
+}
+
+body {
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  word-break: keep-all;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ───────── 카드 · 레이아웃 ───────── */
+.app-container .glass-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  padding: 18px;
+  min-width: 0;
+}
+
+.app-container .view-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.app-container .glass-card h3 {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-container input,
+.app-container select,
+.app-container textarea {
+  font-family: inherit;
+}
+
+/* ───────── 날짜 이동 (DayNav) ───────── */
+.app-container .day-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.app-container .day-nav-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.app-container .day-nav-label {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 8px 4px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.app-container .day-nav-label .sun { color: var(--danger); }
+.app-container .day-nav-label .sat { color: var(--primary); }
+.app-container .day-nav-label input[type='date'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.app-container .day-nav-today {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+.app-container .day-nav-today.hidden {
+  visibility: hidden;
+}
+
+/* 공통 섹션 헤더 */
+.app-container .section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.app-container .section-title h3 { margin: 0; }
+.app-container .pill {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* ───────── 하단 탭바 ───────── */
+.app-container .nav-item {
+  gap: 3px;
+  padding: 6px 0;
+}
+.app-container .nav-item.active {
+  transform: none;
+}
+.app-container .nav-item .nav-icon {
+  width: 44px;
+  height: 28px;
+  border-radius: 14px;
+  transition: background 0.2s;
+}
+.app-container .nav-item.active .nav-icon {
+  background: var(--primary-soft);
+}
+.app-container .nav-item .nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.app-container .nav-label {
+  font-size: 0.6875rem;
+}
+
+/* ───────── 홈 ───────── */
+.app-container .welcome-card h2 {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+.app-container .welcome-card p {
+  font-size: var(--fs-sm);
+  color: var(--text-sub);
+}
+.app-container .stat-card h3 {
+  font-size: var(--fs-sm);
+  color: var(--text-sub);
+  font-weight: 600;
+}
+.app-container .vacation-value {
+  font-size: var(--fs-xl);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.app-container .home-memo-textarea,
+.app-container .memo-textarea {
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.app-container .home-memo-textarea:focus,
+.app-container .memo-textarea:focus {
+  background: var(--card-bg);
+  border-color: var(--primary);
+}
+.app-container .quick-add-form {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 6px 6px 6px 14px;
+  align-items: center;
+}
+.app-container .quick-add-form input { min-width: 0; font-size: var(--fs-base); }
+.app-container .quick-add-form button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.app-container .home-task-item {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.app-container .task-edit-input { min-width: 0; font-size: var(--fs-base); }
+
+/* 백업 바: 버튼이 화면 밖으로 밀리지 않게 줄바꿈 */
+.app-container .backup-bar {
+  flex-wrap: wrap;
+  overflow: visible;
+  background: var(--card-bg);
+  border-color: var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 12px 14px;
+}
+.app-container .backup-bar-label {
+  white-space: normal;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.app-container .backup-bar-btns {
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  margin-left: 0;
+}
+
+/* ───────── 일정 ───────── */
+.app-container .scheduler-header {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+.app-container .sched-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.app-container .sched-summary-text {
+  flex: 1;
+  min-width: 0;
+}
+.app-container .sched-summary-text strong {
+  display: block;
+  font-size: var(--fs-md);
+}
+.app-container .sched-summary-text span {
+  font-size: var(--fs-sm);
+  color: var(--text-sub);
+}
+.app-container .sched-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.app-container .sched-bar > div {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.app-container .schedule-form .input-row {
+  gap: 8px;
+}
+.app-container .time-select {
+  flex-shrink: 0;
+  padding: 0 10px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.app-container .time-select select {
+  font-size: var(--fs-base);
+}
+.app-container .task-input {
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  font-size: var(--fs-base);
+}
+.app-container .add-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+.app-container .timeline-list { gap: 10px; }
+.app-container .timeline-item { gap: 10px; align-items: center; }
+.app-container .time-label {
+  min-width: 44px;
+  padding-top: 0;
+  font-size: var(--fs-sm);
+}
+.app-container .item-content {
+  padding: 12px 12px 12px 14px;
+  gap: 12px;
+  border-radius: 14px;
+}
+.app-container .item-content:hover { transform: none; }
+.app-container .task-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-base);
+}
+.app-container .delete-item-btn {
+  opacity: 1;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.app-container .empty-timeline {
+  padding: 32px 16px;
+  font-size: var(--fs-sm);
+}
+
+/* ───────── 메모 ───────── */
+.app-container .memo-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-container .memo-textarea {
+  min-height: 160px;
+  margin-top: 10px;
+}
+.app-container .memo-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--text-sub);
+  margin-top: 6px;
+}
+
+/* ───────── 연차 ───────── */
+.app-container .vacation-view { gap: var(--gap); }
+.app-container .vacation-stats { gap: 8px; }
+.app-container .stat-item {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.app-container .stat-item .value { font-size: var(--fs-lg); white-space: nowrap; }
+.app-container .vac-summary-header h3,
+.app-container .vac-section-header h3 { font-size: var(--fs-md); }
+
+/* ───────── 터치 기기: hover 로만 보이던 버튼을 항상 표시 ───────── */
+@media (hover: none) {
+  .app-container .remove-badge-btn,
+  .app-container .chip-remove-btn,
+  .app-container .event-remove-btn,
+  .app-container .delete-task-btn {
+    opacity: 1;
+  }
+}
+
+/* ───────── 모바일 ───────── */
+@media (max-width: 768px) {
+  .app-container .glass-card { padding: 16px; }
+  .app-container .desktop-header { height: 56px; }
+  .app-container .logo { font-size: 1.0625rem; }
+  .app-container .clock-display { font-size: var(--fs-md); }
+
+  /* 홈: 오늘 일정이 먼저 보이도록 순서 변경 */
+  .app-container .home-main-grid { gap: var(--gap); }
+  .app-container .home-left-col,
+  .app-container .home-right-col { gap: var(--gap); }
+  /* 왼쪽 열을 풀어서 '요약 숫자 → 오늘 일정 → 진행률·달력' 순으로 배치 */
+  .app-container .home-main-grid { display: flex; flex-direction: column; }
+  .app-container .home-left-col { display: contents; }
+  .app-container .stat-row { order: -2; }
+  .app-container .home-right-col { order: -1; }
+  .app-container .stat-row { gap: 10px; }
+  .app-container .stat-card { padding: 14px; }
+  .app-container .circular-progress-container {
+    width: 132px !important;
+    max-width: 132px !important;
+  }
+  .app-container .circular-text .percent { font-size: 1.75rem; }
+  .app-container .circular-text .count { font-size: var(--fs-sm); margin-top: 4px; }
+  .app-container .today-schedule-card { min-height: 0; }
+  .app-container .home-task-list { max-height: none; }
+
+  /* 일정 */
+  .app-container .timeline-item { flex-direction: row; }
+
+  /* 연차 */
+  .app-container .vacation-stats .label { font-size: var(--fs-xs); }
+}
+
+@media (max-width: 380px) {
+  .app-container .vacation-value { font-size: 1.25rem; }
+  .app-container .day-nav-label { font-size: var(--fs-base); }
+  .app-container .stat-item .value { font-size: var(--fs-md); }
+}

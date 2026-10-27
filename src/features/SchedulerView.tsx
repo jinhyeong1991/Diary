@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Plus, CheckCircle2, Circle, Trash2, Clock } from 'lucide-react'
 import { useScheduleStore } from '../store/useStore'
 import { localDateStr } from '../utils/dateUtils'
+import DayNav from '../components/DayNav'
 
 const SchedulerView: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(() => localDateStr())
@@ -39,46 +40,22 @@ const SchedulerView: React.FC = () => {
   // Sort by time
   const sortedSchedules = [...daySchedules].sort((a, b) => a.time - b.time)
 
-  // Circular Progress Helper
-  const radius = 30
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (progress / 100) * circumference
-
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       className="view-container"
     >
       <section className="glass-card scheduler-header">
-        <div className="date-picker-container">
-          <input 
-            type="date" 
-            value={selectedDate} 
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="schedule-date-input"
-          />
-        </div>
-        
-        <div className="progress-info">
-          <h3>일정 진행률</h3>
-          <div className="circular-progress-container">
-            <svg className="circular-progress" width="80" height="80" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r={radius} className="bg-circle" />
-              <motion.circle 
-                cx="40" cy="40" r={radius} 
-                className="progress-circle"
-                strokeDasharray={circumference}
-                initial={{ strokeDashoffset: circumference }}
-                animate={{ strokeDashoffset }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </svg>
-            <div className="circular-text">
-              <span className="percent">{progress.toFixed(0)}%</span>
-            </div>
+        <DayNav date={selectedDate} onChange={setSelectedDate} />
+        <div className="sched-summary">
+          <div className="sched-summary-text">
+            <strong>{totalCount === 0 ? '등록된 일정 없음' : `${completedCount} / ${totalCount} 완료`}</strong>
+            <span>{totalCount === 0 ? '아래에서 시간과 할 일을 추가하세요' : progress === 100 ? '오늘 할 일을 모두 끝냈어요 🎉' : `남은 일 ${totalCount - completedCount}개`}</span>
+            <div className="sched-bar"><div style={{ width: `${progress}%` }} /></div>
           </div>
+          <span className="pill">{progress.toFixed(0)}%</span>
         </div>
       </section>
 
@@ -95,12 +72,13 @@ const SchedulerView: React.FC = () => {
             </div>
             <input 
               type="text" 
-              placeholder="어떤 일을 하실 건가요?" 
+              placeholder="할 일 입력"
+              enterKeyHint="done"
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               className="task-input"
             />
-            <button type="submit" className="add-btn"><Plus size={20} /></button>
+            <button type="submit" className="add-btn" aria-label="일정 추가"><Plus size={20} /></button>
           </div>
         </form>
       </section>
@@ -108,7 +86,7 @@ const SchedulerView: React.FC = () => {
       <section className="timeline-section">
         {sortedSchedules.length === 0 ? (
           <div className="glass-card empty-timeline">
-            <p>오늘 등록된 일정이 없습니다. 새로운 일정을 추가해보세요!</p>
+            <p>이 날 등록된 일정이 없습니다.<br />위 입력칸에 할 일을 적고 + 를 눌러 추가하세요.</p>
           </div>
         ) : (
           <div className="timeline-list">
@@ -126,8 +104,9 @@ const SchedulerView: React.FC = () => {
                     {item.completed ? <CheckCircle2 size={22} color="var(--primary)" /> : <Circle size={22} />}
                   </div>
                   <span className="task-text">{item.task}</span>
-                  <button 
-                    className="delete-item-btn" 
+                  <button
+                    className="delete-item-btn"
+                    aria-label="일정 삭제"
                     onClick={(e) => { e.stopPropagation(); deleteSchedule(selectedDate, item.id); }}
                   >
                     <Trash2 size={16} />

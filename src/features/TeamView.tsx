@@ -112,6 +112,14 @@ const TeamView: React.FC = () => {
     a.id === session.user.id ? -1 : b.id === session.user.id ? 1 : a.name.localeCompare(b.name, 'ko')
   )
 
+  // 상단 요약: 휴가자, 전체 진행률
+  const onLeave = sorted.filter(p => {
+    const st = schedulesByUser[p.id]?.state
+    return st?.personalLeave?.[date] || st?.personalHalfLeave?.[date]
+  })
+  const allItems = sorted.flatMap(p => schedulesByUser[p.id]?.state?.schedules?.[date] ?? [])
+  const allDone = allItems.filter(i => i.completed).length
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -127,6 +135,26 @@ const TeamView: React.FC = () => {
         </div>
         <button onClick={() => setDate(shiftDate(date, 1))} aria-label="다음 날"><ChevronRight size={20} /></button>
       </section>
+
+      <section className="team-summary">
+        <div className="team-summary-item">
+          <span className="team-summary-num">{sorted.length}</span>
+          <span className="team-summary-label">팀원</span>
+        </div>
+        <div className="team-summary-item">
+          <span className="team-summary-num leave">{onLeave.length}</span>
+          <span className="team-summary-label">휴가</span>
+        </div>
+        <div className="team-summary-item">
+          <span className="team-summary-num">{allItems.length ? Math.round((allDone / allItems.length) * 100) : 0}%</span>
+          <span className="team-summary-label">일정 완료</span>
+        </div>
+      </section>
+      {onLeave.length > 0 && (
+        <p className="team-muted team-leave-line">
+          🌴 {onLeave.map(p => p.name || displayId(p.email)).join(', ')} 님이 휴가예요
+        </p>
+      )}
 
       {loadError && <p className="team-error">불러오기 실패: {loadError}</p>}
 
@@ -193,18 +221,34 @@ const TeamView: React.FC = () => {
 
 const TeamStyle: React.FC = () => (
   <style>{`
-    .team-view { display: flex; flex-direction: column; gap: 16px; }
+    .team-view { display: flex; flex-direction: column; gap: 14px; }
     .team-card {
-      background: var(--bg-white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
+      background: var(--card-bg, var(--bg-white));
+      border: 1px solid var(--card-border, var(--border));
+      border-radius: var(--radius-card, var(--radius-md));
+      box-shadow: var(--card-shadow, none);
       padding: 16px;
     }
+    .team-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .team-summary-item {
+      background: var(--card-bg, var(--bg-white));
+      border: 1px solid var(--card-border, var(--border));
+      border-radius: 14px;
+      padding: 12px 8px;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .team-summary-num { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
+    .team-summary-num.leave { color: #FF9500; }
+    .team-summary-label { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; }
+    .team-leave-line { padding: 0 4px; }
     .team-card h3 { margin-bottom: 8px; }
     .team-muted { color: var(--text-sub); font-size: 0.9rem; }
     .team-error { color: var(--danger); font-size: 0.9rem; }
     .team-date-bar { display: flex; align-items: center; justify-content: space-between; }
-    .team-date-bar > button { color: var(--text-main); padding: 8px; border-radius: 50%; }
+    .team-date-bar > button {
+      color: var(--text-main); width: 40px; height: 40px; border-radius: 12px;
+      background: var(--surface-2, rgba(0,0,0,0.04)); display: flex; align-items: center; justify-content: center;
+    }
     .team-date-label { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
     .team-today-btn {
       font-size: 0.8rem; color: var(--primary); padding: 4px 10px;

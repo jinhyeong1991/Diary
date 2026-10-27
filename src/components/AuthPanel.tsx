@@ -98,9 +98,10 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
 const AuthStyle: React.FC = () => (
   <style>{`
     .auth-card {
-      background: var(--bg-white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
+      background: var(--card-bg, var(--bg-white));
+      border: 1px solid var(--card-border, var(--border));
+      border-radius: var(--radius-card, var(--radius-md));
+      box-shadow: var(--card-shadow, none);
       padding: 16px;
     }
     .auth-card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
