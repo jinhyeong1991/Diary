@@ -1,40 +1,47 @@
 import React, { useState } from 'react'
-import { Cloud, LogOut, Mail } from 'lucide-react'
-import { useCloudStore, sendLoginEmail, verifyLoginCode, signOut } from '../sync/cloudSync'
+import { Cloud, LogOut, LogIn } from 'lucide-react'
+import { useCloudStore, signInWithPassword, signUpWithPassword, signOut } from '../sync/cloudSync'
 import { isCloudEnabled } from '../lib/supabase'
+
+function authErrorMsg(err: unknown): string {
+  const m = err instanceof Error ? err.message : String(err)
+  if (m.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 맞지 않습니다. 처음이면 "처음 가입"을 눌러 주세요.'
+  if (m.includes('Email not confirmed')) return '가입 확인 메일의 링크를 먼저 눌러 주세요.'
+  if (m.includes('User already registered')) return '이미 가입된 이메일입니다. 로그인을 눌러 주세요.'
+  if (m.includes('Password should be')) return '비밀번호는 6자 이상이어야 합니다.'
+  if (m.toLowerCase().includes('rate limit')) return '메일 발송 한도를 넘었습니다. 1시간 뒤 다시 시도해 주세요.'
+  return m
+}
 
 // compact = 로그인된 상태에서 계정 정보 + 로그아웃만 보여줌
 const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const { session, status, lastSyncedAt, errorMsg } = useCloudStore()
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
 
   if (!isCloudEnabled) return null
 
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!email.trim() || !password) return
     setBusy(true); setMsg('')
     try {
-      await sendLoginEmail(email.trim())
-      setSent(true)
-      setMsg('메일을 보냈습니다. 메일의 링크를 누르거나, 받은 코드를 아래에 입력하세요.')
+      await signInWithPassword(email.trim(), password)
     } catch (err) {
-      setMsg('전송 실패: ' + (err instanceof Error ? err.message : String(err)))
+      setMsg(authErrorMsg(err))
     } finally { setBusy(false) }
   }
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!code.trim()) return
+  const handleSignUp = async () => {
+    if (!email.trim() || !password) { setMsg('이메일과 사용할 비밀번호를 입력해 주세요.'); return }
     setBusy(true); setMsg('')
     try {
-      await verifyLoginCode(email.trim(), code.trim())
+      const loggedIn = await signUpWithPassword(email.trim(), password)
+      if (!loggedIn) setMsg('확인 메일을 보냈습니다. 메일의 링크를 한 번 누른 뒤, 여기서 로그인해 주세요.')
     } catch (err) {
-      setMsg('코드 확인 실패: ' + (err instanceof Error ? err.message : String(err)))
+      setMsg(authErrorMsg(err))
     } finally { setBusy(false) }
   }
 
@@ -63,16 +70,14 @@ const AuthPanel: React.FC<{ compact?: boolean }> = ({ compact }) => {
     <section className="auth-card">
       <h3><Cloud size={18} color="var(--primary)" /> 로그인하고 PC·모바일 동기화</h3>
       <p className="auth-desc">로그인하면 일정·메모·연차가 모든 기기에 실시간으로 맞춰지고, 팀 일정을 볼 수 있습니다.</p>
-      <form onSubmit={handleSend} className="auth-form">
-        <input type="email" placeholder="회사 이메일" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
-        <button type="submit" disabled={busy}><Mail size={16} /> {sent ? '다시 보내기' : '로그인 메일 받기'}</button>
+      <form onSubmit={handleSignIn} className="auth-form auth-form-col">
+        <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+        <input type="password" placeholder="비밀번호 (6자 이상)" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" />
+        <div className="auth-btns">
+          <button type="submit" disabled={busy}><LogIn size={16} /> 로그인</button>
+          <button type="button" className="auth-secondary" disabled={busy} onClick={handleSignUp}>처음 가입</button>
+        </div>
       </form>
-      {sent && (
-        <form onSubmit={handleVerify} className="auth-form">
-          <input inputMode="numeric" placeholder="메일로 받은 코드" value={code} onChange={e => setCode(e.target.value)} autoComplete="one-time-code" />
-          <button type="submit" disabled={busy}>확인</button>
-        </form>
-      )}
       {msg && <p className="auth-desc">{msg}</p>}
       <AuthStyle />
     </section>
@@ -100,6 +105,11 @@ const AuthStyle: React.FC = () => (
       background: var(--primary); color: white; border-radius: var(--radius-sm); font-weight: 600;
     }
     .auth-form button:disabled { opacity: 0.6; }
+    .auth-form-col { flex-direction: column; }
+    .auth-form-col input { flex: none; }
+    .auth-btns { display: flex; gap: 8px; }
+    .auth-btns button { flex: 1; justify-content: center; height: 42px; }
+    .auth-form .auth-secondary { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
     .auth-row { display: flex; align-items: center; gap: 8px; }
     .auth-email { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .auth-ghost { margin-left: auto; display: flex; align-items: center; gap: 4px; color: var(--text-sub); font-size: 0.85rem; white-space: nowrap; }

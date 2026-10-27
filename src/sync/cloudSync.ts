@@ -245,17 +245,20 @@ export function initCloudSync() {
   })
 }
 
-export async function sendLoginEmail(email: string) {
+// 이메일+비밀번호 방식: 아이폰 홈 화면 앱은 Safari 와 저장소가 분리돼 메일 링크 로그인이 앱에 전달되지 않음
+export async function signInWithPassword(email: string, password: string) {
   if (!supabase) throw new Error('클라우드가 설정되지 않았습니다.')
-  const redirectTo = window.location.origin + window.location.pathname
-  const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } })
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw error
 }
 
-export async function verifyLoginCode(email: string, token: string) {
+// 반환값: true = 바로 로그인됨, false = 확인 메일의 링크를 눌러야 함
+export async function signUpWithPassword(email: string, password: string): Promise<boolean> {
   if (!supabase) throw new Error('클라우드가 설정되지 않았습니다.')
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+  const redirectTo = window.location.origin + window.location.pathname
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } })
   if (error) throw error
+  return !!data.session
 }
 
 export async function signOut() {
